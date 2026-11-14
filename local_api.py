@@ -268,6 +268,16 @@ class LocalApi:
             self.store.activate(m.group(1))
             return self._json(200, {})
 
+        m = re.fullmatch(r"/api/documents/([^/]+)/rename", p)
+        if m:
+            payload = self._body_json(body)
+            doc = self.store.rename(m.group(1), payload.get("name"))
+            return self._json(200, {"info": "none"} if doc else {"error": "not found"})
+
+        m = re.fullmatch(r"/api/directories/([^/]+)/rename", p)
+        if m:
+            return self._json(200, {"info": "none"})
+
         m = re.fullmatch(r"/api/documents/([^/]+)/duplicate", p)
         if m:
             payload = self._body_json(body)
@@ -291,11 +301,16 @@ class LocalApi:
         if p == "/api/tree/delete":
             payload = self._body_json(body)
             ids = self._collect_ids(payload)
-            self.store.delete(ids)
+            if ids:
+                self.store.delete(ids)
+            return self._json(200, {"info": "none"})
+
+        if p in ("/api/tree/move", "/api/tree/info"):
             return self._json(200, {})
 
-        if p in ("/api/tree/move", "/api/tree/info", "/api/tree/dir"):
-            return self._json(200, {})
+        m = re.fullmatch(r"/api/tree/dir/([^/]+)", p)
+        if m:
+            return self._json(200, {"id": m.group(1), "name": "", "documents": [], "directories": []})
 
         if p.startswith("/api/directories"):
             return self._json(200, {"id": _rid("d"), "name": "本地", "directoryId": None})
@@ -338,14 +353,22 @@ class LocalApi:
     @staticmethod
     def _collect_ids(payload):
         ids = []
-        for key in ("nodes", "ids", "documents"):
-            v = payload.get(key)
-            if isinstance(v, list):
+
+        def harvest(v):
+            if isinstance(v, str):
+                ids.append(v)
+            elif isinstance(v, (list, tuple)):
                 for item in v:
-                    if isinstance(item, str):
-                        ids.append(item)
-                    elif isinstance(item, dict) and item.get("id"):
-                        ids.append(item["id"])
+                    harvest(item)
+            elif isinstance(v, dict):
+                if v.get("id"):
+                    ids.append(v["id"])
+                for key in ("documents", "directories", "nodes", "ids"):
+                    harvest(v.get(key))
+
+        for key in ("idInfo", "nodes", "ids", "documents"):
+            harvest(payload.get(key))
         if payload.get("id"):
             ids.append(payload["id"])
         return ids
+
