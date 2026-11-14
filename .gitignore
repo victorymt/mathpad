@@ -1,0 +1,20 @@
+# 运行时数据：你的文档（不想进版本库）
+.data/
+
+# 编辑器静态资源缓存（首次运行自动下载，约 15 MB，可随时重建）
+.cache/
+
+# 运行日志
+.logs/
+
+# 登录态（仅 --online 模式需要，绝不提交）
+.cookies.json
+
+# Python
+__pycache__/
+*.py[cod]
+
+# 临时文件
+.preview/
+*.tmp
+.DS_Store
