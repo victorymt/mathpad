@@ -1,0 +1,28 @@
+# 当前版本 (f9164fb5-ced37e37) 的懒加载 chunk 列表
+# 用途：warm_cache.py 按此列表预热 .cache/，让这些功能离线可用；
+# 上游发新版后这个列表会过期（文件名带 hash），届时重新生成即可。
+https://cdn.mathcha.io/5ee6e4729be5d4d1da7e.3.bundle.js
+https://cdn.mathcha.io/a01dd79c79513ffcef1a.32.bundle.js
+https://cdn.mathcha.io/89801316518ea20bb2f1.48.bundle.js
+https://cdn.mathcha.io/3dc9b864a3acbb4711ac.54.bundle.js
+https://cdn.mathcha.io/4f1e2b72a740c527cf6d.116.bundle.js
+https://cdn.mathcha.io/ec12d3e823e31b82178c.118.bundle.js
+https://cdn.mathcha.io/8823de0e1ae1fe9fdd74.128.bundle.js
+https://cdn.mathcha.io/17abadd8054e50c1aa3c.147.bundle.js
+https://cdn.mathcha.io/f65e87436428ce1ac153.241.bundle.js
+https://cdn.mathcha.io/c74bb502c39e1505b0d1.244.bundle.js
+https://cdn.mathcha.io/518a49460dc5e828380b.270.bundle.js
+https://cdn.mathcha.io/cacfbbc6f0ef6707d595.287.bundle.js
+https://cdn.mathcha.io/e096bb3bbb2fc46a1aa1.288.bundle.js
+https://cdn.mathcha.io/4e448f248f44c228e25d.381.bundle.js
+https://cdn.mathcha.io/11649b13c9a99c8f65df.397.bundle.js
+https://cdn.mathcha.io/544cc91bed61b7671178.409.bundle.js
+https://cdn.mathcha.io/df316efde074d98318ec.435.bundle.js
+https://cdn.mathcha.io/ea74eb243b23785902cb.475.bundle.js
+https://cdn.mathcha.io/4db4853c2478945648d6.537.bundle.js
+https://cdn.mathcha.io/dfdabbea4b6043090551.538.bundle.js
+https://cdn.mathcha.io/c4587c65c9fd6c1a0a95.673.bundle.js
+https://cdn.mathcha.io/eb62de89d02c43279f15.833.bundle.js
+https://cdn.mathcha.io/b2ba851663d79234d381.843.bundle.js
+https://cdn.mathcha.io/518a49460dc5e828380b.270.bundle.css
+https://cdn.mathcha.io/544cc91bed61b7671178.409.bundle.css
