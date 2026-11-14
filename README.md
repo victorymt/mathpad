@@ -1,7 +1,6 @@
-# Mathcha 本地版（严格离线）
+# Mathcha offline
 
-把 Mathcha 网页编辑器原样跑在本机：`http://127.0.0.1:7801/editor`。
-与网页版同一套前端代码，**编辑体验一致**；但纯单机运行——不需要账号、不联网、文档存本机。
+Mathcha 网页编辑器跑在本机：`http://127.0.0.1:7801/editor`。
 
 ![编辑器](screenshots/offline.png)
 
@@ -18,9 +17,6 @@ python3 fetch_assets.py     # 下载编辑器资源到 .cache/（113 个文件�
 ```bash
 ./start.sh                  # → http://127.0.0.1:7801/editor
 ```
-
-本目录的资源已下载好，可直接 `./start.sh`。
-
 ## 现有功能
 
 | 功能 | 说明 |
@@ -35,8 +31,6 @@ python3 fetch_assets.py     # 下载编辑器资源到 .cache/（113 个文件�
 | **打印** | 菜单里的 Print（可另存为 PDF） |
 | **外观** | 深色模式、缩放 |
 
-> 范围之外（纯单机所以没有）：账号、云同步、分享链接、协作、云端历史、图片上传、图表/文献在线服务。
-
 ## 数据
 
 | 项 | 位置 |
@@ -47,19 +41,12 @@ python3 fetch_assets.py     # 下载编辑器资源到 .cache/（113 个文件�
 
 - **备份**：复制 `.data/store.json` 或整个 `.data/`。
 - **清空**：删掉 `.data/store.json`，下次启动自动建空文档。
-- **换机器**：整个目录拷走（含 `.cache/` 就免下载）。
-
-## 离线保证
-
-1. **服务端**：`server.py` 只读 `.cache/`；缓存缺失直接 404（不回源），并记 `.data/cache-misses.log`。
-2. **浏览器**：页面响应头带 CSP（`connect-src 'self'`、`font-src 'self'`、`img-src 'self' data: blob:` 等），外网请求一律被拦。
-3. **界面**：账号/分享入口已关闭，"插入图片"按钮已隐藏，其余联网接口由本地实现返回空。
-
+- **换机器**：整个目录拷走（含 `.cache/` ）。
 ## 目录结构
 
 ```
 mathcha-local/
-├── server.py          # 严格离线的本地服务（静态只读缓存 + 本地 /api 实现）
+├── server.py          # 本地服务（静态只读缓存 + 本地 /api 实现）
 ├── local_api.py       # 文档存取：init2 / active2 / 读 / 保存 / 新建 / 重命名 / 删除
 ├── fetch_assets.py    # 唯一的联网脚本：首次安装或升级时下载资源
 ├── start.sh           # 启动
@@ -81,5 +68,5 @@ mathcha-local/
 
 ## 合规
 
-用 Mathcha 公开发布的前端代码在本机跑一个纯离线副本，**仅供个人本机使用**：不要分发、不要做成对外服务。
+用 Mathcha 公开发布的前端代码在本机跑一个纯离线副本，**仅供个人本机使用**
 需要官方离线版可购买 [Mathcha Notebook](https://www.mathcha.io/notebook/)。
