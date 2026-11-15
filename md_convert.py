@@ -8,6 +8,7 @@
   python3 md_convert.py import notes.md [--name 名字] [--port 7801] [--offline] [--dry-run]
   python3 md_convert.py export <docId> [--port 7801] [--offline] [-o out.md]
   python3 md_convert.py check notes.md        # 只转换并打印统计/警告，不落库
+  python3 md_convert.py list                  # 列出文档 id 与名字（导出用）
 
 约定：
   - Markdown 是序列化层：模型里不存 Markdown 原文；不支持的语法一律降级并告警，不静默丢。
@@ -1006,6 +1007,22 @@ def cmd_export(args) -> int:
     return 0
 
 
+def cmd_list(args) -> int:
+    """列出文档 id 与名字，方便 export 用。"""
+    if args.offline or not server_alive(args.port):
+        api = _offline_store()
+        docs = api.store.docs()
+    else:
+        data = _http_json("GET", args.port, "/api/init2")
+        docs = ((data or {}).get("tree") or {}).get("documents") or []
+    if not docs:
+        print("（没有文档）")
+        return 0
+    for d in docs:
+        print(f"{d.get('id', '?'):<14} {d.get('name', '')}")
+    return 0
+
+
 def cmd_check(args) -> int:
     markdown = _read_text(args.file)
     model, warnings = markdown_to_model(markdown)
@@ -1043,6 +1060,11 @@ def main(argv: list[str] | None = None) -> int:
     p_chk = sub.add_parser("check", help="只转换并统计（不落库）")
     p_chk.add_argument("file")
     p_chk.set_defaults(func=cmd_check)
+
+    p_ls = sub.add_parser("list", help="列出文档 id 与名字（导出用）")
+    p_ls.add_argument("--port", type=int, default=DEFAULT_PORT)
+    p_ls.add_argument("--offline", action="store_true", help="直接读 .data/store.json")
+    p_ls.set_defaults(func=cmd_list)
 
     args = ap.parse_args(argv)
     return args.func(args)

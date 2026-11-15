@@ -14,7 +14,10 @@ python3 md_convert.py import notes.md --name "我的笔记"
 # 只转换、不落库：打印模型 JSON 和降级警告
 python3 md_convert.py import notes.md --dry-run
 
-# 导出（docId 见 .data/store.json 的 documents[].id）
+# 列出所有文档（id + 名字），导出时用
+python3 md_convert.py list
+
+# 导出
 python3 md_convert.py export <docId> -o notes.md
 
 # 只看转换统计（不落库）

@@ -33,6 +33,7 @@ Markdown 文件可以直接导成编辑器文档，文档也能导回 Markdown�
 
 ```bash
 python3 md_convert.py import notes.md --name "我的笔记"   # 导入（服务需在跑；刷新页面即可看到）
+python3 md_convert.py list                                # 列文档，拿 docId
 python3 md_convert.py export <docId> -o notes.md          # 导出
 python3 md_convert.py check notes.md                      # 只转换、看统计和降级警告
 python3 md_selftest.py                                    # 自检（51 项，不需要服务）
