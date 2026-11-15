@@ -10,6 +10,7 @@ import re
 import secrets
 import threading
 import time
+import urllib.parse
 
 DIGITS = "0123456789"
 ALNUM = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -332,6 +333,39 @@ class LocalApi:
                 "dataBackupLocation": os.path.abspath(self.data_dir),
                 "appLogLocation": os.path.abspath(os.path.join(self.data_dir, "logs")),
             })
+
+        # ---------- Markdown 导入 / 导出（实现见 md_convert.py） ----------
+        if p == "/api/md/import":
+            payload = self._body_json(body)
+            markdown = payload.get("markdown")
+            if not isinstance(markdown, str) or not markdown.strip():
+                return self._json(400, {"error": "markdown 为空"})
+            import md_convert  # 延迟导入：避免与 md_convert 的离线落库路径形成循环
+
+            model, warnings = md_convert.markdown_to_model(markdown)
+            name = (payload.get("name") or "Markdown 导入").strip()[:120] or "Markdown 导入"
+            doc = self.store.create_doc(name, json.dumps(model, ensure_ascii=False))
+            return self._json(200, {
+                "docId": doc["id"],
+                "name": doc["name"],
+                "lines": len(model.get("lines") or []),
+                "warnings": warnings,
+            })
+
+        if p == "/api/md/export":
+            qs = urllib.parse.parse_qs(urllib.parse.urlsplit(path).query)
+            doc_id = (qs.get("docId") or [""])[0]
+            doc = self.store.find(doc_id) if doc_id else self.store.active()
+            if doc is None:
+                return self._json(404, {"error": "document not found"})
+            import md_convert
+
+            try:
+                model = json.loads(doc["data"])
+            except ValueError:
+                return self._json(500, {"error": "文档模型不是合法 JSON"})
+            md, _warnings = md_convert.model_to_markdown(model)
+            return 200, "text/markdown; charset=utf-8", md.encode("utf-8")
 
         if p.startswith("/api/commands/") or p.startswith("/api/request-"):
             return self._json(200, {})
