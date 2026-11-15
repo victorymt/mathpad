@@ -1,0 +1,483 @@
+{
+ "note": "探针文档在编辑器里实际操作后保存的真实模型（source of truth: docs/re/markdown-encoding.md）",
+ "docs": {
+  "md-probe": {
+   "docId": "dO34V4aIQrCt",
+   "model": {
+    "id": "r0.97216213686634826",
+    "lines": [
+     {
+      "id": "n0.03650031298029317",
+      "blocks": [
+       {
+        "id": "n0.10241223705226787",
+        "text": "ZZ"
+       }
+      ],
+      "style": {
+       "listType": "unorder"
+      }
+     },
+     {
+      "id": "n0.58777352920462651",
+      "blocks": [
+       {
+        "id": "n0.6182654892708235",
+        "text": "AB"
+       }
+      ]
+     }
+    ],
+    "pageSettings": {
+     "pageSize": {
+      "width": 700
+     }
+    },
+    "___version": 2,
+    "version": 2,
+    "av": 49
+   }
+  },
+  "md-probe2": {
+   "docId": "ml53hr04Yinj",
+   "model": {
+    "id": "r0.25503827021296525",
+    "lines": [
+     {
+      "id": "n0.03972628876594933",
+      "blocks": [
+       {
+        "id": "n0.3663456603124291",
+        "text": "H1TITLE"
+       }
+      ],
+      "style": {
+       "listType": "section",
+       "indentIndex": 0
+      }
+     },
+     {
+      "id": "n0.8323705939130888",
+      "blocks": [
+       {
+        "id": "n0.34506217458809685",
+        "text": "H2TITLE"
+       }
+      ],
+      "style": {
+       "listType": "section",
+       "indentIndex": 1
+      }
+     },
+     {
+      "id": "n0.087283791787087",
+      "blocks": [
+       {
+        "id": "n0.3037734680877108",
+        "text": "H3TITLE"
+       }
+      ]
+     },
+     {
+      "id": "n0.7284641696212335",
+      "blocks": [
+       {
+        "id": "n0.014602115364311774",
+        "text": "UNORDER1"
+       }
+      ],
+      "style": {
+       "listType": "unorder"
+      }
+     },
+     {
+      "id": "n0.16496147981356157",
+      "blocks": [
+       {
+        "id": "n0.5164229202057363",
+        "text": "CHILD1"
+       }
+      ],
+      "style": {
+       "listType": "unorder",
+       "indentIndex": 1
+      }
+     },
+     {
+      "id": "n0.8684939004515069",
+      "blocks": [
+       {
+        "id": "n0.09155068367854458",
+        "text": "UNORDER2"
+       }
+      ],
+      "style": {
+       "listType": "unorder",
+       "indentIndex": 1
+      }
+     },
+     {
+      "id": "n0.9433367881415904",
+      "blocks": [
+       {
+        "id": "n0.8419005217205735",
+        "text": "ORDER1"
+       }
+      ],
+      "style": {
+       "listType": "order",
+       "indentIndex": 1
+      }
+     },
+     {
+      "id": "n0.8478871854818799",
+      "blocks": [
+       {
+        "id": "n0.07651073927184071",
+        "text": "ORDER2"
+       }
+      ],
+      "style": {
+       "listType": "order",
+       "indentIndex": 1
+      }
+     },
+     {
+      "id": "n0.7885597334377937",
+      "blocks": [],
+      "style": {
+       "listType": "order",
+       "indentIndex": 1
+      }
+     },
+     {
+      "id": "n0.7625129548065852",
+      "blocks": [
+       {
+        "text": "TEXT",
+        "id": "n0.49203278887140534"
+       }
+      ],
+      "style": {
+       "listType": "order",
+       "indentIndex": 1
+      }
+     },
+     {
+      "id": "n0.91284214515197528",
+      "blocks": []
+     }
+    ],
+    "pageSettings": {
+     "pageSize": {
+      "width": 700
+     }
+    },
+    "___version": 2,
+    "version": 2,
+    "av": 72
+   }
+  },
+  "md-probe3": {
+   "docId": "MWGspkcyoMPD",
+   "model": {
+    "id": "r0.63389765194162591",
+    "lines": [
+     {
+      "id": "n0.7304084394833239",
+      "blocks": [],
+      "style": null
+     },
+     {
+      "id": "n0.9463283979731597",
+      "blocks": [],
+      "style": null
+     },
+     {
+      "id": "n0.63612659627642197",
+      "blocks": [
+       {
+        "text": "UNDER",
+        "id": "n0.16177733143984052",
+        "style": {
+         "textDecoration": "underline"
+        }
+       },
+       {
+        "text": "WORDWORDWORD",
+        "id": "n0.4145382802935835"
+       }
+      ]
+     },
+     {
+      "id": "n0.77852487405660362",
+      "blocks": []
+     }
+    ],
+    "pageSettings": {
+     "pageSize": {
+      "width": 700
+     }
+    },
+    "___version": 2,
+    "version": 2,
+    "av": 54
+   }
+  },
+  "md-p-bold": {
+   "docId": "vLijT4cFdYmJ",
+   "model": {
+    "id": "r0.34514301359537956",
+    "lines": [
+     {
+      "id": "n0.10541063910601740",
+      "blocks": [
+       {
+        "id": "n0.6436264720593251",
+        "text": "BOLD",
+        "style": {
+         "isBold": true
+        }
+       },
+       {
+        "text": "WORD",
+        "id": "n0.4479267906940968"
+       }
+      ]
+     },
+     {
+      "id": "n0.26362039347467771",
+      "blocks": []
+     }
+    ],
+    "pageSettings": {
+     "pageSize": {
+      "width": 700
+     }
+    },
+    "___version": 2,
+    "version": 2,
+    "av": 48
+   }
+  },
+  "md-p-italic": {
+   "docId": "kjKDFzF6BABA",
+   "model": {
+    "id": "r0.56336505125935826",
+    "lines": [
+     {
+      "id": "n0.03319085603312631",
+      "blocks": [
+       {
+        "id": "n0.38664579304712376",
+        "text": "ITAL",
+        "style": {
+         "isItalic": true
+        }
+       },
+       {
+        "text": "WORD",
+        "id": "n0.5120276682594924"
+       }
+      ]
+     },
+     {
+      "id": "n0.77020032673420050",
+      "blocks": []
+     }
+    ],
+    "pageSettings": {
+     "pageSize": {
+      "width": 700
+     }
+    },
+    "___version": 2,
+    "version": 2,
+    "av": 48
+   }
+  },
+  "md-p-link": {
+   "docId": "kVVQSoT7cNko",
+   "model": {
+    "id": "r0.66956493221431748",
+    "lines": [
+     {
+      "id": "n0.36382139490553620",
+      "blocks": [
+       {
+        "id": "n0.862066522484205",
+        "text": "LINKWORD",
+        "style": {
+         "hyperLink": "https://example.com/x"
+        }
+       }
+      ]
+     },
+     {
+      "id": "n0.4741065576291539",
+      "blocks": [
+       {
+        "id": "n0.13968484206430087",
+        "text": "SECA"
+       }
+      ],
+      "style": {
+       "listType": "section",
+       "indentIndex": 0
+      }
+     },
+     {
+      "id": "n0.32385181246276933",
+      "blocks": []
+     }
+    ],
+    "pageSettings": {
+     "pageSize": {
+      "width": 700
+     }
+    },
+    "___version": 2,
+    "version": 2,
+    "av": 54
+   }
+  },
+  "md-p-math": {
+   "docId": "3rLvojUIek2k",
+   "model": {
+    "id": "r0.26333567965165658",
+    "lines": [
+     {
+      "id": "n0.70970669128982175",
+      "blocks": [
+       {
+        "id": "n0.766046667250344",
+        "text": "$x^2$"
+       }
+      ]
+     },
+     {
+      "id": "n0.58101795062240487",
+      "blocks": []
+     }
+    ],
+    "pageSettings": {
+     "pageSize": {
+      "width": 700
+     }
+    },
+    "___version": 2,
+    "version": 2,
+    "av": 47
+   }
+  },
+  "md-p-math2": {
+   "docId": "U76R4PbLM8Og",
+   "model": {
+    "id": "r0.39354455854488135",
+    "lines": [
+     {
+      "id": "n0.38075377624532418",
+      "blocks": [
+       {
+        "id": "n0.863735247494498",
+        "text": "\\math-container",
+        "type": "composite",
+        "elements": {
+         "mathValue": {
+          "id": "n0.3269718188523979",
+          "lines": [
+           {
+            "id": "n0.8692128758648865",
+            "blocks": [
+             {
+              "id": "n0.9122036351111205",
+              "text": "x"
+             },
+             {
+              "id": "n0.6354498146096913",
+              "text": "\\power",
+              "type": "composite",
+              "elements": {
+               "powerValue": {
+                "id": "n0.30482182316003104",
+                "lines": [
+                 {
+                  "id": "n0.5365699916942954",
+                  "blocks": [
+                   {
+                    "id": "n0.26527254516131005",
+                    "text": "2"
+                   }
+                  ]
+                 }
+                ]
+               }
+              }
+             },
+             {
+              "id": "n0.9117999634060532",
+              "text": "$"
+             }
+            ]
+           }
+          ]
+         }
+        },
+        "displayMode": false,
+        "style": {
+         "mathModeType": "\\displaystyle"
+        }
+       }
+      ]
+     },
+     {
+      "id": "n0.18892361010293091",
+      "blocks": [
+       {
+        "id": "n0.2829499869840032",
+        "text": "AB"
+       },
+       {
+        "id": "n0.4952070394194654",
+        "text": "\\math-container",
+        "type": "composite",
+        "elements": {
+         "mathValue": {
+          "id": "n0.3737894335490549",
+          "lines": [
+           {
+            "id": "n0.6421478619444312",
+            "blocks": [
+             {
+              "id": "n0.5892365515932974",
+              "text": "x"
+             }
+            ]
+           }
+          ]
+         }
+        },
+        "displayMode": false,
+        "style": {
+         "mathModeType": "\\displaystyle"
+        }
+       },
+       {
+        "id": "n0.018617494354490227",
+        "text": "CD"
+       }
+      ]
+     }
+    ],
+    "pageSettings": {
+     "pageSize": {
+      "width": 700
+     }
+    },
+    "___version": 2,
+    "version": 2,
+    "av": 57
+   }
+  }
+ }
+}

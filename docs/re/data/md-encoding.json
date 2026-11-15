@@ -1,0 +1,170 @@
+{
+  "version": 1,
+  "generatedAt": "2026-11-15",
+  "purpose": "Markdown 导入器要写进模型的字段规格。只记录『能落库、能渲染』的事实，不记录猜测。",
+  "method": "浏览器实测（127.0.0.1:7801/editor）：用 CDP 驱动合成 KeyboardEvent 打快捷键 + 往隐藏 textarea 派发 input 事件打字，然后从 .data/store.json 抄保存后的真实模型。标 source 的条目来自 .cache/cdn/bundle-f9164fb5-ced37e37.js 源码核对。",
+  "samples": "同目录 md-encoding-samples.json（8 个探针文档的完整模型原文）",
+  "evidenceLevels": {
+    "browser": "在编辑器里实际操作 → 保存 → 抄模型",
+    "source": "bundle 源码核对，未做 UI 实测",
+    "inferred": "由前两者推断，尚未验证"
+  },
+
+  "docShell": {
+    "evidence": "browser",
+    "model": {
+      "id": "r0.<17位数字>",
+      "lines": ["line"],
+      "pageSettings": { "pageSize": { "width": 700 } },
+      "___version": 2,
+      "version": 2,
+      "av": 46
+    },
+    "notes": [
+      "av 是模型结构版本号，客户端每次改模型 +1，用于让 delayRenderCache 失效；新导入文档给任意小整数（如 1）即可，不需要 delayRenderCache",
+      "新建空文档的骨架就是 local_api.new_doc_json()：2 个空行 + pageSettings.pageSize.width=700"
+    ]
+  },
+
+  "line": {
+    "idPattern": "n0.<17位数字>",
+    "plain": {
+      "evidence": "browser",
+      "model": { "id": "n0.…", "blocks": [{ "id": "n0.…", "text": "AB" }] },
+      "notes": ["纯文本行只有 blocks；被编辑过的空行可能显式带 \"style\": null（两种写法都被接受）"]
+    },
+    "lineStyleKeys": {
+      "evidence": "source",
+      "keys": ["listType", "indentIndex", "align", "textDirection", "listBulletStyle", "listTypeSkip", "listItemResetIndex"],
+      "notes": ["getBaseLineClass 把它们映射成 align-left/center/right/justify、has-rtl、indent-N、listType 等 CSS 类"]
+    },
+    "heading": {
+      "evidence": "browser",
+      "model": { "id": "n0.…", "blocks": [{ "id": "n0.…", "text": "H1TITLE" }], "style": { "listType": "section", "indentIndex": 0 } },
+      "levels": 3,
+      "indentIndexBase": 0,
+      "renderedPrefix": ["1. ", "1.1. ", "1.1.1. "],
+      "domClass": "line.root.section.sindent-0 / sindent-1 / sindent-2",
+      "samples": ["md-probe2.md-probe2.lines[0..1]", "md-p-link.SECA"],
+      "notes": [
+        "标题 = 行样式，不是 block；编号由渲染期按 section 计数器生成，不存模型",
+        "setListType 源码里对 section 做了上限钳制：indentIndex > 2 会被改回 2 → 模型只有 3 级标题",
+        "快捷键 Ctrl+Alt+1/2/3：与当前级别相同则取消 section，不同则设为目标级别（handleSectionAction，要求 root line selected）"
+      ]
+    },
+    "unorderList": {
+      "evidence": "browser",
+      "indent0": { "style": { "listType": "unorder" } },
+      "indent1": { "style": { "listType": "unorder", "indentIndex": 1 } },
+      "renderedPrefix": ["• ", "– "],
+      "domClass": "line.root.indent-N.has-indent.list-item",
+      "notes": ["indentIndex=0 时该键被省略（不是写 0）"]
+    },
+    "orderList": {
+      "evidence": "browser",
+      "model": { "style": { "listType": "order", "indentIndex": 1 } },
+      "renderedPrefix": { "indent0": "1. 2. 3.", "indent1": "(a) (b) (c)" },
+      "notes": [
+        "编号与计数器都是渲染期算的，模型只存 listType+indentIndex",
+        "默认 orderDefaults/unorderDefaults 是字符串 \"order\"/\"unorder\"，也可被用户设置覆盖成格式数组（未实测）"
+      ]
+    },
+    "emptyLineWithListStyle": {
+      "evidence": "browser",
+      "model": { "id": "n0.…", "blocks": [], "style": { "listType": "order", "indentIndex": 1 } },
+      "notes": ["空行也能带列表样式；md 空行分段时别误带样式即可"]
+    }
+  },
+
+  "block": {
+    "text": {
+      "evidence": "browser",
+      "model": { "id": "n0.…", "text": "BOLD" },
+      "notes": ["没有 type 字段就是文本块（isTextBlock = !block.type）；text 可以是多字符"]
+    },
+    "textStyle": {
+      "evidence": "browser",
+      "keys": {
+        "isBold": { "model": { "isBold": true }, "latex": "\\textbf{}" },
+        "isItalic": { "model": { "isItalic": true }, "latex": "\\textit{}" },
+        "textDecoration": { "model": { "textDecoration": "underline" }, "values": ["underline", "line-through"], "latex": "\\underline{} / \\st{}" },
+        "hyperLink": { "model": { "hyperLink": "https://example.com/x" }, "latex": "\\href{}{}" },
+        "fontName": { "model": { "fontName": "pcr" }, "notes": ["pcr = Courier New（等宽），helvet = Arial，ptm = Times New Roman"], "evidence": "source" },
+        "fontSize": { "evidence": "source" },
+        "color": { "evidence": "source", "latex": "\\textcolor[rgb]{r,g,b}{}" },
+        "bgColor": { "evidence": "source" },
+        "mathType": { "evidence": "source", "notes": ["\\mathbb 等数学样式命令写在文本块的 style.mathType 上"] }
+      },
+      "splitRule": "样式只覆盖被选中的字符；同一个文本块会被拆成『样式块 + 无样式块』，例如 BOLDWORD 整体加粗前 4 字后变成 [BOLD{isBold}, WORD]",
+      "samples": ["md-p-bold", "md-p-italic", "md-probe3.UNDER", "md-p-link.LINKWORD"]
+    },
+    "single": {
+      "evidence": "browser",
+      "model": { "id": "n0.…", "type": "single", "text": "(" },
+      "notes": ["不可拆符号；括号在模型里就是 single{text:\"(\"}，不保存 \\left…\\right 配对"]
+    },
+    "composite": {
+      "evidence": "browser",
+      "model": { "id": "n0.…", "type": "composite", "text": "\\frac", "elements": { "value": { "id": "n0.…", "lines": [] }, "sub1": { "id": "n0.…", "lines": [] } } },
+      "notes": ["elements 的值是子 editor {id, lines}，不是 blocks 数组；text 是 LaTeX 命令名"]
+    }
+  },
+
+  "math": {
+    "inlineContainer": {
+      "evidence": "browser",
+      "trigger": "文本模式里输入单个字符 $",
+      "model": {
+        "id": "n0.…", "type": "composite", "text": "\\math-container", "displayMode": false,
+        "style": { "mathModeType": "\\displaystyle" },
+        "elements": { "mathValue": { "id": "n0.…", "lines": [{ "id": "n0.…", "blocks": [{ "id": "n0.…", "text": "x" }] }] } }
+      },
+      "notes": [
+        "源码里 $ 走 getInlineMathContainerModel()（customSymbolMap[\"\\\\inline-math\"].getModel），但落库的 text 是 \"\\\\math-container\" + displayMode:false",
+        "$…$ 混排真实形态：一行 blocks = [text \"AB\", 该 composite, text \"CD\"]（samples: md-p-math2 第 2 行）",
+        "再打 $ 不会关闭容器，容器内 $ 是普通字符；退出要按 →（或点容器外）"
+      ]
+    },
+    "superscript": {
+      "evidence": "browser",
+      "model": { "id": "n0.…", "type": "composite", "text": "\\power", "elements": { "powerValue": { "id": "n0.…", "lines": [{ "id": "n0.…", "blocks": [{ "id": "n0.…", "text": "2" }] }] } } },
+      "notes": ["单个上标是 \\power；同一基座上下标才是 \\power-index；下标是 \\index"]
+    },
+    "displayContainer": {
+      "evidence": "source",
+      "model": { "type": "composite", "text": "\\math-container", "displayMode": true },
+      "notes": ["display 数学不是 $ 触发的，走模板/菜单；md 的 $$…$$ 要自己构造 displayMode:true 的容器，渲染未实测"]
+    }
+  },
+
+  "inputShortcuts": {
+    "evidence": "browser",
+    "list": {
+      "Ctrl+Alt+1/2/3": "行 → section 级别 1/2/3（同级再按 = 取消）",
+      "Ctrl+Shift+8": "行 → unorder 列表",
+      "Ctrl+Shift+7": "行 → order 列表",
+      "Tab / Shift+Tab": "列表缩进 ±1",
+      "Ctrl+B": "选中文本 → isBold",
+      "Ctrl+I": "选中文本 → isItalic",
+      "Ctrl+U": "选中文本 → textDecoration underline",
+      "Ctrl+K": "选中文本 → 弹 Link 输入框 → style.hyperLink",
+      "Ctrl+S": "保存（本地版会 PUT /api/documents/<id>/content）",
+      "$": "文本模式单字符 → 插入行内数学容器"
+    }
+  },
+
+  "limitations": [
+    "标题只有 3 级（indentIndex 0/1/2，源码里 >2 会被钳到 2）：Markdown H4–H6 必须降级或改模型",
+    "textDecoration=line-through 与 fontName=pcr 只做了源码核对，没做 UI 实测",
+    "display 数学（displayMode:true）未实测渲染",
+    "listItemResetIndex（有序列表重编号）未实测",
+    "表格 / 代码块 / 图片 / 多段引用：本次不涉及，模型里对应 \\table / \\code-section / \\image-container，均需另测"
+  ],
+
+  "reproduce": {
+    "启动": "python3 server.py 7801 → http://127.0.0.1:7801/editor?paper=0",
+    "打字": "隐藏 textarea 派发 input 事件（app 的 onInput 读取 value 后自己清空）；多字符要逐字符打，否则 $ 这类单字符快捷语法不触发",
+    "快捷键": "document/textarea 上派发合成 KeyboardEvent（keyCode 必填），bundle 用 keyCode + ctrlKey/altKey/shiftKey 判定",
+    "取证": "操作完 Ctrl+S 或等自动保存，然后读 .data/store.json 里对应文档的 data 字段（JSON 字符串）"
+  }
+}
