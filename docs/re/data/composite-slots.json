@@ -1,0 +1,561 @@
+[
+ {
+  "module": 12215,
+  "latex": [
+   "\\\\textcircled"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "value"
+    ],
+    "keyInsertOnSelection": null
+   }
+  ]
+ },
+ {
+  "module": 1318,
+  "latex": [
+   "\\\\exercise"
+  ],
+  "names": [
+   "\\\\exercise"
+  ],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "question",
+     "hint",
+     "solution"
+    ],
+    "keyInsertOnSelection": "question"
+   }
+  ]
+ },
+ {
+  "module": 13376,
+  "latex": [
+   "\\\\underline-section"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": "\\\\underline-section",
+    "elements": [
+     "ulvalue"
+    ],
+    "keyInsertOnSelection": "ulvalue"
+   }
+  ]
+ },
+ {
+  "module": 22647,
+  "latex": [
+   "\\\\text-mode-group-inline"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "value"
+    ],
+    "keyInsertOnSelection": "value"
+   }
+  ]
+ },
+ {
+  "module": 23148,
+  "latex": [
+   "\\\\math-mode-group"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "value"
+    ],
+    "keyInsertOnSelection": "value"
+   }
+  ]
+ },
+ {
+  "module": 28979,
+  "latex": [],
+  "names": [
+   "\\\\multiline"
+  ],
+  "slots": [
+   {
+    "text": "\\\\multiline",
+    "elements": [
+     "mathValue"
+    ],
+    "keyInsertOnSelection": "mathValue"
+   }
+  ]
+ },
+ {
+  "module": 33564,
+  "latex": [
+   "\\\\theorem"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "theorem"
+    ],
+    "keyInsertOnSelection": null
+   }
+  ]
+ },
+ {
+  "module": 43369,
+  "latex": [],
+  "names": [
+   "\\\\cfrac",
+   "\\\\dfrac",
+   "\\\\frac",
+   "\\\\tfrac"
+  ],
+  "slots": [
+   {
+    "text": "\\\\frac",
+    "elements": [
+     "value",
+     "sub1"
+    ],
+    "keyInsertOnSelection": "value"
+   }
+  ]
+ },
+ {
+  "module": 48939,
+  "latex": [
+   "\\\\overbrace"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "value",
+     "sub1"
+    ],
+    "keyInsertOnSelection": null
+   }
+  ]
+ },
+ {
+  "module": 49632,
+  "latex": [],
+  "names": [
+   "\\\\power-index"
+  ],
+  "slots": [
+   {
+    "text": "\\\\power-index",
+    "elements": [
+     "powerValue",
+     "indexValue"
+    ],
+    "keyInsertOnSelection": null
+   }
+  ]
+ },
+ {
+  "module": 53109,
+  "latex": [],
+  "names": [
+   "\\\\power"
+  ],
+  "slots": [
+   {
+    "text": "\\\\power",
+    "elements": [
+     "powerValue"
+    ],
+    "keyInsertOnSelection": null
+   }
+  ]
+ },
+ {
+  "module": 56599,
+  "latex": [
+   "\\\\image-container"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "caption"
+    ],
+    "keyInsertOnSelection": "value"
+   }
+  ]
+ },
+ {
+  "module": 57728,
+  "latex": [],
+  "names": [
+   "\\\\z-axiom",
+   "\\\\z-basic",
+   "\\\\z-schema"
+  ],
+  "slots": [
+   {
+    "text": "\\\\z-schema",
+    "elements": [
+     "name",
+     "symDec",
+     "conPre"
+    ],
+    "keyInsertOnSelection": "symDec"
+   }
+  ]
+ },
+ {
+  "module": 59082,
+  "latex": [
+   "\\\\underbrace"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "value",
+     "sub1"
+    ],
+    "keyInsertOnSelection": null
+   }
+  ]
+ },
+ {
+  "module": 60203,
+  "latex": [],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "powerValue",
+     "indexValue"
+    ],
+    "keyInsertOnSelection": null
+   }
+  ]
+ },
+ {
+  "module": 64027,
+  "latex": [
+   "\\\\longdivision"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "quotient",
+     "divisor",
+     "divident",
+     "r_0",
+     "r_1"
+    ],
+    "keyInsertOnSelection": "ulvalue"
+   }
+  ]
+ },
+ {
+  "module": 64412,
+  "latex": [
+   "\\\\boxed-container"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "value"
+    ],
+    "keyInsertOnSelection": null
+   }
+  ]
+ },
+ {
+  "module": 64722,
+  "latex": [
+   "\\\\table-of-content-item"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "value"
+    ],
+    "keyInsertOnSelection": "value"
+   }
+  ]
+ },
+ {
+  "module": 66015,
+  "latex": [
+   "\\\\super-script"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "tsuperValue"
+    ],
+    "keyInsertOnSelection": "tsuperValue"
+   }
+  ]
+ },
+ {
+  "module": 6604,
+  "latex": [
+   "\\\\stackrel"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "value",
+     "sub1"
+    ],
+    "keyInsertOnSelection": "value"
+   }
+  ]
+ },
+ {
+  "module": 67928,
+  "latex": [],
+  "names": [
+   "\\\\inline-math",
+   "\\\\math-container"
+  ],
+  "slots": [
+   {
+    "text": "\\\\math-container",
+    "elements": [
+     "mathValue"
+    ],
+    "keyInsertOnSelection": "mathValue"
+   }
+  ]
+ },
+ {
+  "module": 68468,
+  "latex": [],
+  "names": [
+   "\\\\sqrt"
+  ],
+  "slots": [
+   {
+    "text": "\\\\sqrt",
+    "elements": [
+     "value",
+     "sub1"
+    ],
+    "keyInsertOnSelection": "value"
+   }
+  ]
+ },
+ {
+  "module": 70536,
+  "latex": [],
+  "names": [
+   "\\\\bra",
+   "\\\\bra\\\\ket",
+   "\\\\expval",
+   "\\\\ket"
+  ],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "value",
+     "sub1",
+     "sub2"
+    ],
+    "keyInsertOnSelection": "value"
+   }
+  ]
+ },
+ {
+  "module": 71064,
+  "latex": [
+   "\\\\raw-latex"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "rawLatexValue"
+    ],
+    "keyInsertOnSelection": null
+   }
+  ]
+ },
+ {
+  "module": 71289,
+  "latex": [
+   "\\\\fracslashed"
+  ],
+  "names": [
+   "\\\\fracslashed",
+   "\\\\tfracslashed"
+  ],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "value"
+    ],
+    "keyInsertOnSelection": null
+   }
+  ]
+ },
+ {
+  "module": 78518,
+  "latex": [
+   "\\\\boxed"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "value"
+    ],
+    "keyInsertOnSelection": null
+   }
+  ]
+ },
+ {
+  "module": 79787,
+  "latex": [
+   "\\\\text-mode-group"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "value"
+    ],
+    "keyInsertOnSelection": "value"
+   }
+  ]
+ },
+ {
+  "module": 80482,
+  "latex": [
+   "\\\\inline-boxed"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "value"
+    ],
+    "keyInsertOnSelection": null
+   }
+  ]
+ },
+ {
+  "module": 8444,
+  "latex": [],
+  "names": [
+   "\\\\index"
+  ],
+  "slots": [
+   {
+    "text": "\\\\index",
+    "elements": [
+     "indexValue"
+    ],
+    "keyInsertOnSelection": null
+   }
+  ]
+ },
+ {
+  "module": 84503,
+  "latex": [
+   "\\\\mci-cas-item"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "value"
+    ],
+    "keyInsertOnSelection": null
+   }
+  ]
+ },
+ {
+  "module": 91360,
+  "latex": [
+   "\\\\overunderset"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "value",
+     "sub1",
+     "sub2"
+    ],
+    "keyInsertOnSelection": null
+   }
+  ]
+ },
+ {
+  "module": 9340,
+  "latex": [
+   "\\\\sub-script"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "tsubValue"
+    ],
+    "keyInsertOnSelection": "tsubValue"
+   }
+  ]
+ },
+ {
+  "module": 99588,
+  "latex": [
+   "\\\\text"
+  ],
+  "names": [],
+  "slots": [
+   {
+    "text": null,
+    "elements": [
+     "textValue"
+    ],
+    "keyInsertOnSelection": null
+   }
+  ]
+ }
+]

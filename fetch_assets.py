@@ -13,6 +13,8 @@
   - 编辑器 HTML → .cache/editor.html
   - assets.txt 里列出的资源（主 bundle、CSS、字体、worker 等）→ .cache/cdn/
   - chunks.txt 里列出的懒加载 chunk → .cache/cdn/
+  - cas-assets.txt 里列出的 CAS 引擎资源（Pyodide + SymPy，约 11 MB）→ .cache/cdn/
+    缺了这些，编辑器照常可用，但 CAS 面板会一直转圈；下载后 CAS 也离线可用。
 
 下载完成后，`python3 server.py` 就是纯离线服务（运行期不会再联网）。
 """
@@ -89,8 +91,13 @@ def main():
     fetch_editor()
     rels = read_list("assets.txt") + read_list("chunks.txt")
     bad = download_all(rels)
+    # CAS 面板的引擎资源（Pyodide + SymPy，约 11 MB）：缺失时 CAS 面板离线不可用
+    print("\n-- CAS 引擎资源（Pyodide + SymPy，约 11 MB；已存在则跳过）--")
+    cas_bad = download_all(read_list("cas-assets.txt"))
+    if cas_bad:
+        print("  ⚠ CAS 资源没有全部到位：编辑器其他功能正常，但 CAS 面板会一直转圈")
     print("\n完成。之后运行：python3 server.py  （纯离线）")
-    sys.exit(1 if bad and not ok_any(rels) else 0)
+    sys.exit(1 if (bad + cas_bad) and not ok_any(rels) else 0)
 
 
 def ok_any(rels):

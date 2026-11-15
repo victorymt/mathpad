@@ -1,0 +1,13 @@
+# CAS 面板（选中公式 → fx → CAS Dialog）的引擎资源清单
+# 引擎：Pyodide + SymPy，由 cas-sympy-module-worker.js 在 Web Worker 里加载
+# 体积：共 8 个文件，gzip 态约 11 MB，解压后约 18 MB（首次 fetch_assets.py 下载一次，之后离线可用）
+# 注意：磁盘上保存 CDN 原始字节（gzip），server.py 读取时自动解压，这里不要预先解压
+# 上游升级后 whl 版本号 / 路径可能变化：看 .data/cache-misses.log 里缺的 /cdn/... 路径，按实际值改本文件
+https://cdn.mathcha.io/cas-sympy-module-worker.js
+https://cdn.mathcha.io/resources/pyodide/pyodide.mjs
+https://cdn.mathcha.io/resources/pyodide/pyodide.asm.mjs
+https://cdn.mathcha.io/resources/pyodide/pyodide.asm.wasm
+https://cdn.mathcha.io/resources/pyodide/python_stdlib.zip
+https://cdn.mathcha.io/resources/pyodide/pyodide-lock.json
+https://cdn.mathcha.io/resources/pyodide/sympy-1.14.0-py3-none-any.whl
+https://cdn.mathcha.io/resources/pyodide/mpmath-1.4.1-py3-none-any.whl

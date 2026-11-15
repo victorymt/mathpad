@@ -1,0 +1,388 @@
+/* ============================================================================
+   白纸模式（Paper Mode）
+   ----------------------------------------------------------------------------
+   目标：界面主体只剩一张干净的白色画布，隐藏 header / 侧边栏 / 工具栏 /
+   插入条 / 缩放退出信息条 / 页面装饰，只保留内容与一个会自动淡出的极简浮层。
+
+   实现方式：复用 Mathcha 内置的 Content View Only 布局（Alt+Shift+E，
+   它会正确重算布局：隐藏 header、侧栏、工具栏，内容区居中），
+   再由本文件把它"洗"成全白，并加上极简浮层。
+
+   全部论文态样式都限定在 html.paper-mode 下，普通模式零影响。
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   1. 普通模式里的入口按钮（顶部右侧，贴在绿色 header 上）
+   ------------------------------------------------------------------------- */
+.paper-entry {
+  position: fixed;
+  top: 6px;
+  right: 12px;
+  z-index: 2147482000;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 10px 0 8px;
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font: 500 12px/1 "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+    Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  opacity: 0.62;
+  transition: opacity 0.16s ease, background-color 0.16s ease, border-color 0.16s ease;
+}
+.paper-entry:hover,
+.paper-entry:focus-visible {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.26);
+  border-color: rgba(255, 255, 255, 0.85);
+  outline: none;
+}
+.paper-entry:active {
+  background: rgba(255, 255, 255, 0.34);
+}
+.paper-entry svg {
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  opacity: 0.9;
+}
+/* 白纸模式里不显示入口；原生全屏过渡期间也不显示（避免白底白字） */
+html.paper-mode .paper-entry,
+html.paper-native .paper-entry,
+html.paper-pending .paper-entry {
+  display: none !important;
+}
+
+/* 窄屏：只留图标，省地方（tooltip/aria-label 仍说明用途） */
+@media (max-width: 700px) {
+  .paper-entry {
+    padding: 0;
+    width: 24px;
+    justify-content: center;
+    right: 8px;
+  }
+  .paper-entry .pe-label {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   2. 白纸模式：全白画布
+   ------------------------------------------------------------------------- */
+
+/* 2.1 背景全部刷白（含深色模式下被染成 #1b1e22 的节点） */
+/* --ui-workspace 是 Mathcha 的"工作区底色"变量，一处改掉即可带走
+   html/body/#root/page/container-layer/content-area 的灰底（#eee / #1b1e22）。 */
+html.paper-mode {
+  --ui-workspace: #fff !important;
+}
+html.paper-mode,
+html.paper-mode body,
+html.paper-mode #root,
+html.paper-mode page,
+html.paper-mode container-layer,
+html.paper-mode .docs-container,
+html.paper-mode .doc-tab-container,
+html.paper-mode .col-math-type-doc-container,
+html.paper-mode .math-type-doc,
+html.paper-mode .doc-scroll-container,
+html.paper-mode content-area {
+  background: #fff !important;
+}
+
+/* 2.2 纸张本身：白底、无边框、无阴影；四周留白由内边距给足 */
+html.paper-mode math-type {
+  background: #fff !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding-top: 32px !important;
+}
+
+/* 2.3 内容区：上下留白充足，左右靠 Mathcha 自己的居中逻辑 */
+html.paper-mode content-area {
+  padding-top: clamp(48px, 9vh, 112px) !important;
+  padding-bottom: 28vh !important;
+}
+
+/* 2.4 隐藏所有非内容 chrome（功能浮层见第 4 节，全部保留）
+      只按"具名类/自定义元素"逐条隐藏，不用后代通配，避免误杀建议框/对话框/CAS 面板。 */
+html.paper-mode header#page-header,
+html.paper-mode .export-bar-container,
+html.paper-mode document-sidebar-expanded,
+html.paper-mode document-sidebar-container,
+html.paper-mode .doc-toolbar-container,
+html.paper-mode .role-toolbar-wrapper,
+html.paper-mode document-info-bar,
+html.paper-mode document-info-container,
+html.paper-mode .doc-items-bar-container,
+html.paper-mode resize-bar,
+html.paper-mode resizing-bar,
+html.paper-mode resizing-info,
+html.paper-mode .resize-bar,
+html.paper-mode .resize-indicator,
+html.paper-mode .green-bar,
+html.paper-mode [class*="page-break"],
+html.paper-mode [class*="pageBreak"] {
+  display: none !important;
+}
+
+/* 2.5 滚动条：细、浅、不抢注意力（仍然可以滚） */
+html.paper-mode .doc-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: #dcdcdc transparent;
+}
+html.paper-mode .doc-scroll-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+html.paper-mode .doc-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+html.paper-mode .doc-scroll-container::-webkit-scrollbar-thumb {
+  background: #e2e2e2;
+  border-radius: 4px;
+}
+html.paper-mode .doc-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #cfcfcf;
+}
+
+/* 2.6 光标颜色：白底上用深色光标（深色主题下 Mathcha 可能是浅色光标） */
+html.paper-mode span.text-cursor {
+  background: #333 !important;
+}
+
+/* 2.7 文档自带"暗色纸张"（math-type.dark-mode）时：白纸模式下翻成白底黑字。
+       只覆盖根编辑区，正文里显式设置的颜色（行内 style）保持不动。 */
+html.paper-mode math-type.dark-mode {
+  background: #fff !important;
+}
+html.paper-mode math-type.dark-mode editarea.root-editor {
+  color: #1b1b1b;
+  fill: #1b1b1b;
+  stroke: #1b1b1b;
+  background: #fff !important;
+}
+
+/* ---------------------------------------------------------------------------
+   3. 白纸模式里的极简浮层（右上角：菜单 / 退出）
+   ------------------------------------------------------------------------- */
+#paper-chrome {
+  position: fixed;
+  top: 10px;
+  right: 14px;
+  z-index: 2147483000;
+  display: none;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+  font: 500 12px/1 "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+    Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+html.paper-mode #paper-chrome {
+  display: flex;
+  opacity: 1;
+}
+/* 鼠标停一会儿后整体淡出，减少打扰；动一下鼠标/点一下又回来 */
+html.paper-mode #paper-chrome.is-idle {
+  opacity: 0;
+}
+html.paper-mode #paper-chrome:focus-within {
+  opacity: 1 !important;
+}
+#paper-chrome .pc-btn {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 11px;
+  margin: 0;
+  border: 1px solid #e4e4e4;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #6b6b6b;
+  font: inherit;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(4px);
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+#paper-chrome .pc-btn:hover {
+  color: #222;
+  border-color: #cfcfcf;
+  background: #fff;
+}
+#paper-chrome .pc-btn:focus-visible {
+  outline: 2px solid #c9d8c9;
+  outline-offset: 1px;
+}
+#paper-chrome .pc-btn svg {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+}
+/* 桌面端淡出后：连点击也一并关掉，避免"看不见的按钮"吃掉纸张右上角的点击。
+   鼠标一动 is-idle 就会被移除，按钮立刻恢复可点。 */
+@media (hover: hover) {
+  html.paper-mode #paper-chrome.is-idle .pc-btn {
+    pointer-events: none;
+  }
+}
+/* 触摸屏没有 hover：浮层常驻，别让用户找不到退出口 */
+@media (hover: none) {
+  html.paper-mode #paper-chrome,
+  html.paper-mode #paper-chrome.is-idle {
+    opacity: 1;
+  }
+}
+/* 窄屏：图标为主，减少占位 */
+@media (max-width: 700px) {
+  #paper-chrome {
+    top: 8px;
+    right: 8px;
+    gap: 5px;
+  }
+  #paper-chrome .pc-btn {
+    height: 26px;
+    padding: 0 9px;
+  }
+  #paper-chrome .pc-btn .pc-label {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   4. 功能浮层白名单 —— 白纸模式下必须保持原样可用
+   （自动建议框 / CAS fx 面板 / 对话框 / 右键菜单 / 查找替换）
+   ------------------------------------------------------------------------- */
+/* 白纸模式下这些容器不能继承"背景白"导致看不清，给一点边界感 */
+html.paper-mode .auto-complete-container,
+html.paper-mode .dg-dialog,
+html.paper-mode [class*="dialog-container"],
+html.paper-mode [class*="context-menu"] {
+  background: #fff;
+}
+
+/* ---------------------------------------------------------------------------
+   5. 空白文档的提示（非阻塞，第一次输入/点击后消失）
+   ------------------------------------------------------------------------- */
+#paper-hint {
+  position: fixed;
+  left: 50%;
+  top: 38vh;
+  z-index: 2147482000;
+  transform: translateX(-50%);
+  width: min(90vw, 560px);
+  text-align: center;
+  color: #c2c2c2;
+  opacity: 1;
+  pointer-events: none;
+  user-select: none;
+  font: 400 15px/1.9 "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+    Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  transition: opacity 0.45s ease;
+}
+#paper-hint .ph-main {
+  font-size: 15px;
+  color: #b9b9b9;
+}
+#paper-hint .ph-sub {
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: #cfcfcf;
+}
+#paper-hint kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  background: #fcfcfc;
+  color: #bdbdbd;
+  font: inherit;
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+#paper-hint.is-hidden {
+  opacity: 0;
+}
+@media (max-width: 700px) {
+  #paper-hint {
+    top: 34vh;
+    font-size: 14px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   6. 窄屏适配
+   ------------------------------------------------------------------------- */
+
+/* 平板及以下：Mathcha 的 content-area 有 min-width:950px 的内联样式，
+   窄屏上会撑出横向滚动条，白纸模式下放开它。 */
+@media (max-width: 1023px) {
+  html.paper-mode content-area {
+    min-width: 0 !important;
+    padding-top: clamp(32px, 6vh, 64px) !important;
+    padding-bottom: 22vh !important;
+  }
+  html.paper-mode math-type {
+    padding-top: 22px !important;
+    /* 600–680px 窗口下 Mathcha 的内联纸宽仍是 660px，会溢出 → 限制不超过视口 */
+    max-width: 100vw !important;
+    box-sizing: border-box;
+    overflow-x: clip;
+  }
+  /* 窄屏下 Mathcha 的 .mt-sa 覆盖层比纸张宽（约 590px），会撑出 100px 横向滚动；
+     正文已经按容器宽度重排（实测 358px 内换行），这里直接掐掉横向滚动。 */
+  html.paper-mode .doc-scroll-container {
+    overflow-x: hidden !important;
+  }
+}
+
+/* 手机竖屏：纸张尽量贴近满宽，留白收小，浮层保持右上角 */
+@media (max-width: 599px) {
+  html.paper-mode content-area {
+    padding-top: 28px !important;
+    padding-bottom: 18vh !important;
+  }
+  html.paper-mode math-type {
+    padding: 34px 18px 18px !important;
+    max-width: 100vw !important;
+    box-sizing: border-box;
+  }
+  #paper-hint {
+    top: 30vh;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   7. 打印 / 减少动效
+   ------------------------------------------------------------------------- */
+@media print {
+  .paper-entry,
+  #paper-chrome,
+  #paper-hint {
+    display: none !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #paper-chrome,
+  #paper-hint,
+  .paper-entry,
+  #paper-chrome .pc-btn {
+    transition: none !important;
+    animation: none !important;
+  }
+}

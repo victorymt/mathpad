@@ -7,6 +7,9 @@
 - `/api/*` 由 `local_api.py` 用本地 JSON 实现（文档存 `.data/store.json`）。
 - 响应带 CSP：`connect-src 'self'` 等，页面就算有代码想发外网请求也会被浏览器拦掉。
 - 需要补资源/升级版本时，单独运行 `python3 fetch_assets.py`（这是唯一联网的脚本）。
+- CAS（计算机代数系统，选中公式后的 fx 面板）也用同一套离线缓存：worker 在站点根
+  `/cas-sympy-module-worker.js`，它内部再从 `/resources/pyodide/` 加载 Pyodide + SymPy。
+  `CAS_ASSETS` 齐了才把 CAS 入口打开，缺资源时保持关闭（不影响其它功能）。
 
 用法：python3 server.py [端口]     默认 7801
 """
@@ -23,6 +26,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 CACHE = os.path.join(ROOT, ".cache", "cdn")
 EDITOR_CACHE = os.path.join(ROOT, ".cache", "editor.html")
 DATA_DIR = os.path.join(ROOT, ".data")
+WEB_DIR = os.path.join(ROOT, "web")
 os.makedirs(DATA_DIR, exist_ok=True)
 
 LOCAL_API = local_api.LocalApi(DATA_DIR)
@@ -30,7 +34,7 @@ LOCAL_API = local_api.LocalApi(DATA_DIR)
 # 只允许同源资源；连外网 fetch/XHR/WebSocket/font/img 全部禁止
 CSP = (
     "default-src 'self' data: blob:; "
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; "
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob:; "
     "style-src 'self' 'unsafe-inline'; "
     "img-src 'self' data: blob:; "
     "font-src 'self' data:; "
@@ -51,6 +55,41 @@ BUNDLE_PATCHES = [
     ),
 ]
 
+# CAS 面板入口（bundle 里默认要 URL 带 ?cas-support=1 才开）。资源齐了就默认打开。
+CAS_BUNDLE_PATCH = (
+    b'this.casSupport=!!this.queryMap["cas-support"]',
+    b"this.casSupport=!0",
+)
+
+# CAS 需要镜像的上游资源（相对 .cache/cdn/，与 CDN 路径一一对应）。
+# 清单只在 cas-assets.txt 里维护一份（fetch_assets.py 也读它），server 这里不要另抄一份；
+# 上游换版本时只改那个文件。
+def _read_cas_assets():
+    rels = []
+    try:
+        with open(os.path.join(ROOT, "cas-assets.txt"), encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#"):
+                    # https://cdn.mathcha.io/resources/pyodide/x.whl → resources/pyodide/x.whl
+                    parts = line.split("://", 1)[-1].split("/", 1)
+                    if len(parts) == 2:
+                        rels.append(parts[1])
+    except OSError:
+        pass
+    return rels
+
+
+CAS_ASSETS = _read_cas_assets()
+# 上游把这两个路径写死在站点根（bundle 里的 "/cas-sympy-module-worker.js"、
+# worker 里的 "/resources/pyodide/"），所以除了 /cdn/<rel> 也按原路径提供一份。
+CAS_ROOT_FILES = tuple("/" + rel for rel in CAS_ASSETS if "/" not in rel)
+CAS_ROOT_PREFIXES = tuple(sorted({"/" + rel.rsplit("/", 1)[0] + "/"
+                                  for rel in CAS_ASSETS if "/" in rel}))
+CAS_READY = bool(CAS_ASSETS) and all(
+    os.path.isfile(os.path.join(CACHE, rel)) for rel in CAS_ASSETS
+)
+
 # 页面上与"联网才能用"相关的入口隐藏（其余按钮都离线可用）
 HIDE_CSS = """
 <style>
@@ -58,6 +97,54 @@ HIDE_CSS = """
   [title*="图片"] { display: none !important; }
 </style>
 """
+
+# 白纸模式（Paper Mode）：注入到 editor.html 的本地样式/脚本。
+# 只做"外壳增强"：不改上游 bundle，不动文档数据，普通模式零影响。
+#   web/paper-mode.css  全白画布 + 隐藏 chrome + 极简浮层样式（限定 html.paper-mode）
+#   web/paper-mode.js   进入/退出、快捷键、状态同步、空白提示
+#
+# 其中 BOOT 是一小段内联脚本：在首帧之前就把 paper-mode class / 浅色主题挂上，
+# 避免深色偏好用户"先看到深色界面再刷成白纸"的闪动（上游 index.js 稍后还会
+# 按自己的设置再写一次 data-ui-theme，我们的脚本会立刻纠正，见 paper-mode.js）。
+PAPER_MODE_BOOT = """
+<script>
+(function () {
+  try {
+    var q = new URLSearchParams(location.search);
+    var v = String(q.get('paper') || '').toLowerCase();
+    var h = String(location.hash || '').toLowerCase();
+    var want;
+    if (v === '1' || v === 'true' || v === 'on' || v === 'yes') want = true;
+    else if (v === '0' || v === 'false' || v === 'off' || v === 'no') want = false;
+    else if (h === '#paper' || h === '#paper-mode' || h === '#papermode') want = true;
+    else if (h === '#normal' || h === '#focused-off') want = false;
+    else { try { want = localStorage.getItem('mathcha-local.paper-mode') === '1'; } catch (e) { want = false; } }
+    if (!want) return;
+    var root = document.documentElement;
+    root.classList.add('paper-mode', 'paper-pending');
+    try { window.__paperBootPrevTheme = root.getAttribute('data-ui-theme') || 'light'; } catch (e) {}
+    root.setAttribute('data-ui-theme', 'light');
+    // 上游 index.js 稍后会按 localStorage 把 data-ui-theme 写回深色；
+    // 这里尽早挂一个观察器，在它写回的同一次任务里纠回浅色（deferred 脚本还会再兜一层）。
+    try {
+      new MutationObserver(function () {
+        // 只在白纸模式里强制浅色；退出后要把深色主题还给用户
+        if (!root.classList.contains('paper-mode')) return;
+        if (root.getAttribute('data-ui-theme') !== 'light') {
+          root.setAttribute('data-ui-theme', 'light');
+        }
+      }).observe(root, { attributes: true, attributeFilter: ['data-ui-theme'] });
+    } catch (e) {}
+  } catch (e) { /* 忽略：脚本失败不影响编辑器本身 */ }
+})();
+</script>
+"""
+
+PAPER_MODE_ASSETS = (
+    '<link rel="stylesheet" href="/web/paper-mode.css" />'
+    + PAPER_MODE_BOOT +
+    '<script src="/web/paper-mode.js" defer></script>'
+)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -107,6 +194,10 @@ class Handler(BaseHTTPRequestHandler):
             ".jpg": "image/jpeg",
             ".svg": "image/svg+xml",
             ".ico": "image/x-icon",
+            # CAS：Pyodide 运行时（wasm / 标准库 zip / wheel）
+            ".wasm": "application/wasm",
+            ".zip": "application/zip",
+            ".whl": "application/octet-stream",
         }.get(ext, "application/octet-stream")
 
     # ---------- 路由 ----------
@@ -136,6 +227,10 @@ class Handler(BaseHTTPRequestHandler):
                 return self.serve_editor()
             if path.startswith("/cdn/"):
                 return self.serve_cached(path[len("/cdn/"):])
+            if path.startswith("/web/"):
+                return self.serve_web(path[len("/web/"):])
+            if path in CAS_ROOT_FILES or path.startswith(CAS_ROOT_PREFIXES):
+                return self.serve_cached(path.lstrip("/"))
             if path.startswith("/api/"):
                 return self.serve_local_api(path, method)
             if path == "/favicon.ico":
@@ -167,7 +262,21 @@ class Handler(BaseHTTPRequestHandler):
         html = html.replace(b'appMode: "main"', b'appMode: "main", shareDisabled: true, accountDisabled: true')
         # 2) 隐藏依赖联网的按钮
         html = html.replace(b"</head>", HIDE_CSS.encode("utf-8") + b"</head>")
+        # 3) 白纸模式（本地样式 + 脚本，随 server.py 一起更新，无需重下缓存）
+        html = html.replace(b"</head>", PAPER_MODE_ASSETS.encode("utf-8") + b"</head>")
         self._send(200, html, "text/html; charset=utf-8", {"Content-Security-Policy": CSP})
+
+    # ---------- 本地前端扩展（白纸模式的 css/js） ----------
+
+    def serve_web(self, rel):
+        """只读地提供 web/ 下的本地扩展文件（同源、no-store，便于改完刷新即生效）。"""
+        safe = rel.split("?")[0].replace("\\", "/").replace("..", "_").lstrip("/")
+        fpath = os.path.join(WEB_DIR, safe)
+        if not safe or not os.path.isfile(fpath):
+            return self._send(404, f"local web asset not found: {safe}")
+        with open(fpath, "rb") as f:
+            data = f.read()
+        self._send(200, data, self.guess_type(safe))
 
     # ---------- 静态资源（只读缓存） ----------
 
@@ -192,7 +301,10 @@ class Handler(BaseHTTPRequestHandler):
         if any(safe.endswith(ext) for ext in (".js", ".mjs", ".css", ".html", ".json")):
             data = self._rewrite_cdn(data)
         if safe.endswith(BUNDLE_NAME):
-            for old, new in BUNDLE_PATCHES:
+            patches = list(BUNDLE_PATCHES)
+            if CAS_READY:
+                patches.append(CAS_BUNDLE_PATCH)
+            for old, new in patches:
                 data = data.replace(old, new)
         self._send(200, data, self.guess_type(safe))
 
@@ -216,6 +328,9 @@ def main():
     srv = ThreadingHTTPServer(("127.0.0.1", port), Handler)
     print(f"Mathcha 本地版（严格离线）: http://127.0.0.1:{port}/editor")
     print(f"数据目录: {os.path.abspath(DATA_DIR)}   （文档在 store.json）")
+    print("CAS: " + ("就绪（本地 Pyodide + SymPy，选中公式后点 fx）"
+                    if CAS_READY else
+                    "未安装（跑一次 python3 fetch_assets.py 补齐 CAS 资源）"))
     print("Ctrl+C 停止")
     try:
         srv.serve_forever()
