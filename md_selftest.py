@@ -50,6 +50,18 @@ def test_headings():
     check("标题：H4 压级有告警", any("H4" in w for w in warns), str(warns))
 
 
+def test_latex_style_headings():
+    md = "\\title1 中文标题\n正文\n\\title2 二级\n\\title3 三级\n\\section{LaTeX 一级}\n\\subsection{LaTeX 二级}\n\\subsubsection{LaTeX 三级}\n"
+    model, warns = mc.markdown_to_model(md)
+    levels = [(l.get("style") or {}).get("indentIndex") for l in section_list(model)]
+    check("LaTeX 风格标题：级别序列 0/1/2/0/1/2", levels == [0, 1, 2, 0, 1, 2], str(levels))
+    check("LaTeX 风格标题：无告警", not warns, str(warns))
+    # H4+ 压级仍生效
+    model2, warns2 = mc.markdown_to_model("\\title5 太深\n")
+    check("LaTeX 风格标题：\\title5 压到 3 级并告警",
+          (section_list(model2)[0]["style"]["indentIndex"] == 2) and any("H5" in w for w in warns2), str(warns2))
+
+
 def test_lists():
     md = "- a\n- b\n  - b1\n\n1. x\n2. y\n"
     model, _ = mc.markdown_to_model(md)
@@ -194,7 +206,7 @@ def test_probe_samples():
 def main() -> int:
     print("md_convert 自检")
     for fn in (
-        test_headings, test_lists, test_inline_styles, test_inline_math, test_display_math,
+        test_headings, test_latex_style_headings, test_lists, test_inline_styles, test_inline_math, test_display_math,
         test_math_symbols, test_math_degrade, test_paragraph_join, test_code_fence, test_quote_table_hr_image,
         test_empty_and_escape, test_roundtrip, test_probe_samples,
     ):

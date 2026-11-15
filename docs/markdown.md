@@ -47,6 +47,8 @@ curl -s 'http://127.0.0.1:7801/api/md/export?docId=<docId>'
 | Markdown | 模型落点 | 状态 |
 |---|---|---|
 | `#` `##` `###` | 行样式 `{listType:"section", indentIndex:0/1/2}` | ✅ 原生 |
+| `\title1` `\title2` `\title3`（扩展语法） | 同上 | ✅ 本转换器扩展 |
+| `\section{…}` `\subsection{…}` `\subsubsection{…}`（扩展语法） | 同上 | ✅ 本转换器扩展 |
 | `####` ~ `######` | 压到 3 级（`indentIndex:2`） | ⚠️ 降级 + 告警 |
 | 段落、软换行 | 段落合并成一行（中文之间不插空格） | ✅ |
 | `-` / `*` / `+` 无序列表、缩进嵌套（最多 3 级） | 行样式 `{listType:"unorder"[, indentIndex]}` | ✅ |
@@ -66,6 +68,26 @@ curl -s 'http://127.0.0.1:7801/api/md/export?docId=<docId>'
 | 内嵌 HTML、脚注、任务列表、引用式链接 | 当普通文本处理 | ⚠️ 无专门处理 |
 
 降级规则：**不静默丢弃**。CLI / API 都会返回 `lossy: …` 警告（带行号），导出的 Markdown 里对应内容仍然在（只是形态变了）。
+
+## 2.1 标题的两种写法
+
+除了 Markdown 的 `#`，导入器也认 LaTeX 风格的标题行（扩展语法，方便习惯 LaTeX 的人）：
+
+```markdown
+\title1 一级标题
+\title2 二级标题
+\title3 三级标题
+
+\section{也可以用 LaTeX 命令写法}
+\subsection{二级}
+\subsubsection{三级}
+```
+
+`\title4` 及以上会压到 3 级并给告警。两种写法可以混用。
+
+> 另外：**在编辑器里**直接敲 `\title1` / `\title2` / `\title3` 也能生成层级标题
+> （`web/title-command.js`，由 server.py 注入；只在本机离线版生效，数学模式下的 `\frac` 等不受影响）。
+> 该增强需要重启 `./start.sh` 才生效。
 
 ## 3. 有损点与原因（模型限制）
 
@@ -100,7 +122,7 @@ curl -s 'http://127.0.0.1:7801/api/md/export?docId=<docId>'
 ## 5. 自检与验收
 
 ```bash
-python3 md_selftest.py      # 51 项：结构断言 + 回环幂等 + 探针样本回归
+python3 md_selftest.py      # 54 项：结构断言 + 回环幂等 + 探针样本回归
 ```
 
 - 结构断言：标题/列表/行内样式/行内数学/块级数学/降级警告/空输入/转义；

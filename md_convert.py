@@ -13,6 +13,7 @@
 约定：
   - Markdown 是序列化层：模型里不存 Markdown 原文；不支持的语法一律降级并告警，不静默丢。
   - 标题只有 3 级（模型 listType=section + indentIndex 0..2），H4–H6 压到 H3 并告警。
+  - 除 Markdown 的 `#` 外，也认 LaTeX 风格的标题行：`\\title1 文本`、`\\section{文本}`（扩展语法）。
 """
 from __future__ import annotations
 
@@ -177,6 +178,9 @@ def parse_inline(s: str, warnings: list, lineno: int) -> list:
 # ---------------------------------------------------------------- 块级 Markdown
 
 _ATX_RE = re.compile(r"^ {0,3}(#{1,6})[ \t]+(.*?)[ \t]*#*[ \t]*$")
+# LaTeX 风格标题（本转换器的扩展语法，方便习惯 LaTeX 的人少敲）：\title1 文本 / \section{文本} …
+_TITLE_SHORT_RE = re.compile(r"^ {0,3}\\(?:title|heading)[ \t]*([1-6])[ \t]*[.:：、]?[ \t]*(.*)$")
+_TITLE_LATEX_RE = re.compile(r"^ {0,3}\\(section|subsection|subsubsection)[ \t]*\{(.*)\}[ \t]*$")
 _FENCE_RE = re.compile(r"^\s*(```+|~~~+)\s*([\w+-]*)\s*$")
 _LIST_RE = re.compile(r"^(\s*)([-*+]|\d{1,9}[.)])[ \t]+(.*)$")
 _QUOTE_RE = re.compile(r"^\s*>\s?(.*)$")
@@ -246,6 +250,22 @@ def parse_markdown(md: str) -> tuple[list, list]:
                         "line": lineno,
                     }
                 )
+            continue
+
+        # LaTeX 风格标题：\title1 文本 / \section{文本}
+        m = _TITLE_SHORT_RE.match(line)
+        if m:
+            flush_para()
+            level = int(m.group(1)) - 1
+            ir.append({"kind": "heading", "level": level, "spans": parse_inline(m.group(2), warnings, lineno), "line": lineno})
+            i += 1
+            continue
+        m = _TITLE_LATEX_RE.match(line)
+        if m:
+            flush_para()
+            level = {"section": 0, "subsection": 1, "subsubsection": 2}[m.group(1)]
+            ir.append({"kind": "heading", "level": level, "spans": parse_inline(m.group(2), warnings, lineno), "line": lineno})
+            i += 1
             continue
 
         # ATX 标题

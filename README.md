@@ -36,10 +36,11 @@ python3 md_convert.py import notes.md --name "我的笔记"   # 导入（服务�
 python3 md_convert.py list                                # 列文档，拿 docId
 python3 md_convert.py export <docId> -o notes.md          # 导出
 python3 md_convert.py check notes.md                      # 只转换、看统计和降级警告
-python3 md_selftest.py                                    # 自检（51 项，不需要服务）
+python3 md_selftest.py                                    # 自检（54 项，不需要服务）
 ```
 
-支持：3 级标题、有序/无序列表（嵌套）、粗体/斜体/删除线/行内代码/链接、行内与块级公式（LaTeX 子集）。
+支持：3 级标题（`#` 或 LaTeX 风格 `\title1` / `\section{…}`）、有序/无序列表（嵌套）、粗体/斜体/删除线/行内代码/链接、行内与块级公式（LaTeX 子集）。
+在编辑器里也可以直接敲 `\title1` / `\title2` / `\title3` 生成层级标题（`web/title-command.js`，重启服务后生效）。
 代码围栏 / 引用 / 表格 / 图片先降级为文本或链接并给出 `lossy:` 警告（不静默丢弃）。
 详见 [docs/markdown.md](docs/markdown.md)，字段依据见 [docs/re/data/md-encoding.json](docs/re/data/md-encoding.json)。
 
@@ -84,7 +85,7 @@ mathcha-local/
 ├── chunks.txt         # 懒加载 chunk 清单（25 项）
 ├── cas-assets.txt     # CAS 引擎资源清单（8 项）
 ├── docs/              # 说明文档（CAS 用法、白纸模式等）
-├── web/               # 本地前端扩展（白纸模式的 css/js，server.py 会注入）
+├── web/               # 本地前端扩展（白纸模式、\title1/2/3 标题命令；server.py 注入）
 ├── .data/store.json   # 你的文档（唯一需要备份的文件）
 ├── .cache/            # 编辑器资源缓存（约 31 MB）
 └── screenshots/

@@ -146,6 +146,10 @@ PAPER_MODE_ASSETS = (
     '<script src="/web/paper-mode.js" defer></script>'
 )
 
+# 编辑器增强：正文里直接敲 \title1/\title2/\title3 生成层级标题（见 web/title-command.js）。
+# 同样是"外壳增强"：不改上游 bundle、不动文档数据；不想要就不注入这段。
+TITLE_COMMAND_ASSETS = '<script src="/web/title-command.js" defer></script>'
+
 
 class Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
@@ -264,6 +268,8 @@ class Handler(BaseHTTPRequestHandler):
         html = html.replace(b"</head>", HIDE_CSS.encode("utf-8") + b"</head>")
         # 3) 白纸模式（本地样式 + 脚本，随 server.py 一起更新，无需重下缓存）
         html = html.replace(b"</head>", PAPER_MODE_ASSETS.encode("utf-8") + b"</head>")
+        # 4) 正文标题命令（\title1/2/3）
+        html = html.replace(b"</head>", TITLE_COMMAND_ASSETS.encode("utf-8") + b"</head>")
         self._send(200, html, "text/html; charset=utf-8", {"Content-Security-Policy": CSP})
 
     # ---------- 本地前端扩展（白纸模式的 css/js） ----------
