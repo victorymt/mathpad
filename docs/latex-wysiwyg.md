@@ -1,7 +1,7 @@
 # mathcha-local 里「LaTeX 所见即所得」是怎么实现的
 
 > 分析对象：本仓库离线运行的 Mathcha 编辑器，版本 `f9164fb5-ced37e37`（`.cache/cdn/bundle-f9164fb5-ced37e37.js`，6.04 MB，webpack 5，1416 个模块）。
-> 结论取证方式：把 bundle 按 webpack 模块拆成可读 JS（`.cache/re/modules/`，脚本 `docs/re/tools/split_bundle.mjs`）+ 浏览器里实测输入/导出/看 DOM。
+> 结论取证方式：把 bundle 按 webpack 模块拆成可读 JS（`mathcha-src/modules/`，脚本 `docs/re/tools/split_bundle.mjs`）+ 浏览器里实测输入/导出/看 DOM。
 > 详细笔记在 `docs/re/`：模型与排版 `model-layout.md`、输入管线 `input-editing.md`、LaTeX 互转 `latex-io.md`、渲染与字体 `render-fonts.md`。
 
 ---
@@ -424,7 +424,7 @@ SVG 尺寸不是猜的：组件 `12481 <SvgDrawing>` 先渲染空 svg 撑满容�
 
 ## 8. 代码地图（模块 id → 作用）
 
-> `.cache/re/modules/<id>.js` 是拆包后可读源码；`docs/re/tools/split_bundle.mjs` 可重新生成。
+> `mathcha-src/modules/<id>.js` 是拆包后可读源码；`docs/re/tools/split_bundle.mjs` 可重新生成。
 
 | module | 作用 |
 |---|---|
@@ -449,7 +449,7 @@ SVG 尺寸不是猜的：组件 `12481 <SvgDrawing>` 先渲染空 svg 撑满容�
 
 ## 9. 这份报告是怎么来的（可复现）
 
-1. `.cache/cdn/bundle-f9164fb5-ced37e37.js` 是单行 6.04 MB 的 webpack 5 产物。用 `@babel/parser` 解析后按"数字键 + `(e,t,r)` 工厂函数"抽出模块表，拆成 1416 个文件（`.cache/re/modules/<id>.js`，局部变量被压缩但**属性名/方法名未混淆**，可直接 grep）。
+1. `.cache/cdn/bundle-f9164fb5-ced37e37.js` 是单行 6.04 MB 的 webpack 5 产物。用 `@babel/parser` 解析后按"数字键 + `(e,t,r)` 工厂函数"抽出模块表，拆成 1416 个文件（`mathcha-src/modules/<id>.js`，局部变量被压缩但**属性名/方法名未混淆**，可直接 grep）。
 2. 把关键模块与 `.cache/cdn/styles-*.css`、`resources/fonts-*.css`、`fonts/*.otf` 对照阅读，得到模型/渲染/互转的主体结论。
 3. 在浏览器（`http://127.0.0.1:7801/editor`）实测：敲 `$`→`\frac`→a→Tab→b 看 DOM/模型；用 Menu → Import from Latex 导入覆盖性公式，再 Menu → Export Selection to Latex 取真实导出文本；逐个测 `\[..\]`/`\(..\)`/`$..$`/`equation`/未知命令。
 4. 详细证据（带 module id、符号名、行号、≤15 行片段）在 `docs/re/`：

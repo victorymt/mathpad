@@ -1,0 +1,61 @@
+/* module 97751 — 2110 chars */
+module.exports = function (e, t, r) {
+  "use strict";
+
+  r.d(t, {
+    Q: () => i,
+    m: () => n
+  });
+  var n = {
+      cs: "Czech",
+      da: "Danish",
+      de: "German",
+      "de-at": "German (Austria)",
+      "de-ch": "German (Switzerland)",
+      "en-au": "English (Australia)",
+      "en-ca": "English (Canada)",
+      "en-gb": "English (United Kingdom)",
+      "en-us": "English (United State)",
+      "en-za": "English (South Africa)",
+      eo: "Esperanto",
+      es: "Spanish (or Castilian)",
+      "es-ar": "Spanish (or Castilian; Argentina)",
+      "es-bo": "Spanish (or Castilian; Bolivia)",
+      "es-cl": "Spanish (or Castilian; Chile)",
+      "es-co": "Spanish (or Castilian; Colombia)",
+      "es-cr": "Spanish (or Castilian; Costa Rica)",
+      "es-cu": "Spanish (or Castilian; Cuba)",
+      "es-do": "Spanish (or Castilian; Dominican Republic)",
+      "es-ec": "Spanish (or Castilian; Ecuador)",
+      "es-gt": "Spanish (or Castilian; Guatemala)",
+      "es-hn": "Spanish (or Castilian; Honduras)",
+      "es-mx": "Spanish (or Castilian; Mexico)",
+      "es-ni": "Spanish (or Castilian; Nicaragua)",
+      "es-pa": "Spanish (or Castilian; Panama)",
+      "es-pe": "Spanish (or Castilian; Peru)",
+      "es-ph": "Spanish (or Castilian; Philippines)",
+      "es-pr": "Spanish (or Castilian; Puerto Rico)",
+      "es-py": "Spanish (or Castilian; Paraguay)",
+      "es-sv": "Spanish (or Castilian; El Salvador)",
+      "es-us": "Spanish (or Castilian; United States)",
+      "es-uy": "Spanish (or Castilian; Uruguay)",
+      "es-ve": "Spanish (or Castilian; Venezuela)",
+      et: "Estonian",
+      fr: "French",
+      ga: "Irish",
+      gd: "Scottish Gaelic (or Gaelic)",
+      he: "Hebrew (modern)",
+      it: "Italian",
+      pl: "Polish",
+      pt: "Portuguese",
+      "pt-pt": "Portuguese (Portugal)",
+      ru: "Russian",
+      sv: "Swedish",
+      "sv-fi": "Swedish (Finland)",
+      tr: "Turkish",
+      uk: "Ukrainian",
+      vi: "Vietnamese",
+      "vi-daucu": "Vietnamese (Dấu Cũ)"
+    },
+    i = ["de", "de-at", "de-ch", "en-au", "en-ca", "en-gb", "en-us", "en-za", "es", "fr", "vi", "vi-daucu"];
+};

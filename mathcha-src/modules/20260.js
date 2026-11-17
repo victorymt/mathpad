@@ -1,0 +1,102 @@
+/* module 20260 — 3222 chars */
+module.exports = function (e, t, r) {
+  "use strict";
+
+  r.d(t, {
+    A: () => a
+  });
+  var n = r(64467),
+    i = r(40927),
+    o = r.n(i);
+  class s {
+    constructor() {
+      (0, n.A)(this, "cache", {});
+    }
+    getRemoveItem(e) {
+      var t = {
+        outline: "none",
+        color: "var(--ui-text-muted, gray)",
+        cursor: "pointer",
+        border: "1px solid transparent",
+        position: "relative",
+        height: 23,
+        display: "block",
+        width: 30,
+        marginLeft: 0,
+        padding: 0
+      };
+      return o().createElement("item", {
+        style: t,
+        title: "Remove Selected Item",
+        className: "remove",
+        onMouseDown: e
+      }, o().createElement("svg", {
+        style: {
+          width: "100%",
+          height: "100%",
+          overflow: "hidden"
+        },
+        viewBox: "-100 -100 1200 1200"
+      }, o().createElement("path", {
+        fill: "indianred",
+        d: "M500,990C229.5,990,10,770.5,10,500S229.5,10,500,10s490,219.5,490,490S770.5,990,500,990z M500,152.9c-191.4,0-347.1,155.7-347.1,347.1c0,191.4,155.7,347.1,347.1,347.1c191.4,0,347.1-155.7,347.1-347.1C847.1,308.6,691.4,152.9,500,152.9z M616.8,709.9c-8.3,8.3-21.1,8.3-29.3,0L500,622.5l-87.4,87.4c-8.3,8.3-21.1,8.3-29.3,0l-93.2-93.2c-8.3-8.3-8.3-21.1,0-29.3l87.4-87.4l-87.4-87.4c-8.3-8.3-8.3-21.1,0-29.3l93.2-93.2c8.3-8.3,21.1-8.3,29.3,0l87.4,87.4l87.4-87.4c8.3-8.3,21.1-8.3,29.3,0l93.2,93.2c8.3,8.3,8.3,21.1,0,29.3L622.5,500l87.4,87.4c8.3,8.3,8.3,21.1,0,29.3L616.8,709.9z"
+      })));
+    }
+    separator1() {
+      return this.cachable("separator1", () => o().createElement("relative-separator", {
+        key: "1"
+      }, o().createElement("bar", null)));
+    }
+    separator() {
+      return this.cachable("separator", () => o().createElement("relative-separator", null, o().createElement("bar", null)));
+    }
+    svgNumberIcon() {
+      var e = {
+        stroke: "none",
+        fontSize: 10,
+        fontWeight: "bold",
+        fill: "var(--ui-text, black)",
+        fontFamily: "Asana-Math, Asana"
+      };
+      return o().createElement("svg", {
+        style: {
+          stroke: "var(--ui-text-muted, gray)",
+          fill: "none",
+          strokeWidth: 1
+        }
+      }, o().createElement("text", {
+        style: e,
+        x: "6",
+        y: "10"
+      }, "1"), o().createElement("text", {
+        style: e,
+        x: "13",
+        y: "10"
+      }, "2"), o().createElement("path", {
+        style: {
+          transform: "translate(0px, 8px)"
+        },
+        d: "M2,7 L20,7 M8,4 L8,10  M16,4 L16,10"
+      }));
+    }
+    svgAxisIcon() {
+      return o().createElement("svg", null, o().createElement("path", {
+        style: {
+          stroke: "var(--ui-text-muted, gray)",
+          transform: "translate(1px,10px)"
+        },
+        d: "M2,7 L20,7 M4,5 L4,9 M8,5 L8,9 M12,5 L12,9 M16,5 L16,9"
+      }), o().createElement("path", {
+        style: {
+          stroke: "var(--ui-text-muted, gray)",
+          transform: "rotate(-270deg) translate(1px,-12px)"
+        },
+        d: "M2,7 L20,7 M4,5 L4,9 M8,5 L8,9 M12,5 L12,9 M16,5 L16,9"
+      }));
+    }
+    cachable(e, t) {
+      return this.cache[e] || (this.cache[e] = t()), this.cache[e];
+    }
+  }
+  const a = new s();
+};

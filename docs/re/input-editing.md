@@ -1,6 +1,6 @@
 # Mathcha 公式「所见即所得输入」管线（task-2）
 
-分析对象：`.cache/re/modules/*.js`（由 `.cache/cdn/bundle-f9164fb5-ced37e37.js` 按 webpack moduleId 拆出）。
+分析对象：`mathcha-src/modules/*.js`（由 `.cache/cdn/bundle-f9164fb5-ced37e37.js` 按 webpack moduleId 拆出）。
 符号名（属性名/方法名）未被混淆，局部变量被压缩；文中 `11154:7445` 之类表示 module 文件:行号。
 【已核实】= 直接读到实现；【推测】= 由相邻代码/命名推断，未跑动态验证。
 

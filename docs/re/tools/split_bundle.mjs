@@ -3,7 +3,18 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import * as babelParser from '@babel/parser';
-import generate from '@babel/generator';
+import * as generatorNs from '@babel/generator';
+import * as typesNs from '@babel/types';
+
+const types = typesNs.default ?? typesNs;
+
+// @babel/generator 是 CJS 包，在不同 Node / 安装方式下 ESM 默认导出形状不一：
+// 有时是函数，有时是 { default: 函数 }。这里统一取可调用版本。
+const generate =
+  generatorNs.generate ??
+  generatorNs.default?.generate ??
+  generatorNs.default?.default ??
+  generatorNs.default;
 
 const [bundlePath, outDir] = process.argv.slice(2);
 if (!bundlePath || !outDir) {
@@ -78,8 +89,13 @@ const index = [];
 for (const p of table.node.properties) {
   const k = keyName(p);
   if (!k || !/^\d+$/.test(k)) continue;
-  const fn = p.type === 'ObjectMethod' ? p : p.value;
+  let fn = p.type === 'ObjectMethod' ? p : p.value;
   if (!fn) continue;
+  // webpack 模块表里是「对象方法简写」：11154(e, t, r) { ... }
+  // 单独成文件时它不是合法表达式，这里还原成 function (e, t, r) { ... } 再挂到 module.exports。
+  if (p.type === 'ObjectMethod') {
+    fn = types.functionExpression(null, p.params, p.body, p.generator, p.async);
+  }
   let code;
   try {
     code = generate(fn, { comments: true, jsescOption: { minimal: true } }, src).code;
@@ -88,7 +104,7 @@ for (const p of table.node.properties) {
   }
   const file = path.join(outDir, `${k}.js`);
   const header = `/* module ${k} — ${code.length} chars */\n`;
-  fs.writeFileSync(file, header + code);
+  fs.writeFileSync(file, header + 'module.exports = ' + code + ';\n');
   // crude content hints
   const strings = [...code.matchAll(/"((?:[^"\\]|\\.){6,60})"/g)]
     .slice(0, 2000)

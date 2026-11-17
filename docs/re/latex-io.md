@@ -1,6 +1,6 @@
 # LaTeX 互转（toLatex 导出 / parseLatex 导入 / MathML）
 
-> 分析对象：`.cache/cdn/bundle-f9164fb5-ced37e37.js` 拆包后的 `.cache/re/modules/*.js`
+> 分析对象：`.cache/cdn/bundle-f9164fb5-ced37e37.js` 拆包后的 `mathcha-src/modules/*.js`
 > 约定：`【核实】` = 直接读到实现/字面量；`【推测】` = 由调用关系推断、未做运行时验证。
 > 线上实测（Lead，tab 22）：`\frac` 的 DOM 类叫 enumerator/denominator，但模型槽位是 `value`/`sub1`；`\math-container` 槽位是 `mathValue`，带 `displayMode:false` 与 `style.mathModeType:"\\displaystyle"` —— 与本文静态结论一致。
 
@@ -25,7 +25,7 @@
 
 ## 离线运行时验证（harness：真实 28623 + 51737，符号组件用桩）
 
-为了不依赖浏览器，用 Node 直接加载 **真实的** `28623.js`（PEG 语法）与 `51737.js`（入口/后处理），只把 `98095`（符号组件表）、`70224`（模型工厂）、`30803`（id）、`97372/86081/47858` 等替换成最小桩（记录调用参数），跑 `.cache/re/scratch/latex-io_parse_harness.js`。**语法/后处理/分派是真实代码，组件内部 `toModel` 的槽位细节是桩日志 + 静态源码对照**。
+为了不依赖浏览器，用 Node 直接加载 **真实的** `28623.js`（PEG 语法）与 `51737.js`（入口/后处理），只把 `98095`（符号组件表）、`70224`（模型工厂）、`30803`（id）、`97372/86081/47858` 等替换成最小桩（记录调用参数），跑 `docs/re/tools/latex-io_parse_harness.js`。**语法/后处理/分派是真实代码，组件内部 `toModel` 的槽位细节是桩日志 + 静态源码对照**。
 
 | 输入 | startRule | 结果 | 观察到的关键调用/结构 |
 |---|---|---|---|

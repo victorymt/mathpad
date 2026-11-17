@@ -1,0 +1,111 @@
+/* module 62456 — 2239 chars */
+module.exports = function (e, t, r) {
+  "use strict";
+
+  r.d(t, {
+    U: () => h,
+    mt: () => g
+  });
+  var n = r(40927),
+    i = r.n(n),
+    o = r(19539),
+    s = r(29315),
+    a = r(88925),
+    l = r(33535),
+    c = r(84369);
+  class d extends s.dV {
+    render() {
+      var e = h(this.shape()),
+        t = a.A.getLineD(e);
+      return i().createElement("g", {
+        className: this.props.className,
+        onMouseDown: this.props.onMouseDown,
+        onTouchStart: this.props.onMouseDown
+      }, this.getStyleDefs(), this.getTransparentOnlyNoFill(t), i().createElement("path", {
+        className: "real",
+        d: t,
+        style: this.style()
+      }));
+    }
+  }
+  function h(e) {
+    var t = e.data,
+      r = t.p1,
+      n = t.p2,
+      i = t.percentage,
+      s = void 0 === i ? 3 / 8 : i,
+      a,
+      c = o.A.rectWidth(e.data) / 2,
+      d = Math.min(c, s * c),
+      h = r.y,
+      p = n.y,
+      u = r.x,
+      g = r.x + d,
+      m = n.x - d,
+      f = n.x;
+    return l.A.pointsTransformed(e.data, [{
+      x: g,
+      y: h
+    }, {
+      x: f,
+      y: h
+    }, {
+      x: m,
+      y: p
+    }, {
+      x: u,
+      y: p
+    }, {
+      x: g,
+      y: h
+    }]);
+  }
+  class p extends s.US {}
+  class u extends s.Au {
+    getIcon() {
+      return {
+        caption: "",
+        component: i().createElement("svg", {
+          style: {
+            width: 23,
+            height: 20,
+            position: "relative"
+          },
+          key: this.getType()
+        }, i().createElement("path", {
+          style: {
+            stroke: "gray",
+            fill: "none",
+            transform: "translate(1px,0px)"
+          },
+          d: " M6.68,6 L16.1,6 L13.93,15 L4.5,15 Z"
+        }))
+      };
+    }
+    getComponent() {
+      return d;
+    }
+    getType() {
+      return "flow-data";
+    }
+    getSettingsComponent() {
+      return p;
+    }
+    getBreakdownInfoWhenInvalidCache(e) {
+      return {
+        data: o.A.pointsToLines(h(e))
+      };
+    }
+    getSnapablePoints(e) {
+      return h(e).concat(o.A.getCenterPoint(e.data));
+    }
+    getBoundingRect(e) {
+      var t = h(e);
+      return o.A.getBoundingRectFromPoints(t);
+    }
+    getPaperPath(e) {
+      return c.A.fromPoints(h(e));
+    }
+  }
+  var g = new u();
+};

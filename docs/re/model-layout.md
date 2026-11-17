@@ -1,6 +1,6 @@
 # 数学模型与排版引擎（task-1）
 
-分析对象：`.cache/cdn/bundle-f9164fb5-ced37e37.js` 拆出的 `.cache/re/modules/*.js`、
+分析对象：`.cache/cdn/bundle-f9164fb5-ced37e37.js` 拆出的 `mathcha-src/modules/*.js`、
 `.cache/cdn/styles-f9164fb5-ced37e37.css`、`.cache/cdn/resources/fonts-*.css`。
 约定：`11154.js:24129` 表示「module 11154 第 24129 行」；【已核实】=直接看到实现/表数据；
 【推测】=由实现合理外推但没逐行确认。

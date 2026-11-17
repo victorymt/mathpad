@@ -1,6 +1,6 @@
 # 渲染与字体（task-4 / render-fonts）
 
-> 证据来源：`.cache/re/modules/<id>.js`（webpack5 模块，属性名未混淆）、`.cache/cdn/bundle-f9164fb5-ced37e37.js`（未拆分的少数模块用 bundle 字节偏移标注）、
+> 证据来源：`mathcha-src/modules/<id>.js`（webpack5 模块，属性名未混淆）、`.cache/cdn/bundle-f9164fb5-ced37e37.js`（未拆分的少数模块用 bundle 字节偏移标注）、
 > `.cache/cdn/styles-f9164fb5-ced37e37.css`、`.cache/cdn/resources/fonts-*.css`、`.cache/cdn/fonts/**`、`.cache/cdn/dynamic-resources/data1`。
 > 动态取证由 Lead 提供（tab 22，`http://127.0.0.1:7801/editor`，实测敲 `$` → `\frac` → a / Tab / b）。
 > 自制脚本：`.cache/re/scratch/render-fonts_otf.py`（极简 sfnt/cmap/hmtx 解析）、`.cache/re/scratch/render-fonts_data1.js`（lz-string 解 data1）。

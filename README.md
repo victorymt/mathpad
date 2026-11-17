@@ -60,6 +60,20 @@ python3 md_selftest.py                                    # 自检（54 项，�
 | **白纸模式** | 一键把界面收成一张干净白纸：隐藏 header / 侧栏 / 工具栏 / 插入条 / 缩放条，整屏刷白；入口：右上角「白纸模式」按钮、`Alt+Shift+E`、`?paper=1`；退出：右上角「退出」、`Alt+Shift+E`、双击 `Esc`。写作 / 公式 / CAS / 自动保存照常，文档管理与导出走右上角「菜单」。详见 [docs/paper-mode.md](docs/paper-mode.md) |
 | **外观** | 深色模式、缩放 |
 
+## 上游编辑器源码（还原）
+
+`.cache/` 里的编辑器是压缩过的单行 webpack 产物（6 MB）。仓库里另外存了一份**还原成可读模块**的版本：
+
+```
+mathcha-src/
+├── index.json          # 1416 个模块的索引（id / 文件 / 代码长度 / 字符串线索）
+├── modules/<id>.js     # 每个模块一个合法的 CommonJS 文件（module.exports = function (e, t, r) {…}）
+└── README.md           # 来源、关键模块表、重新生成方法
+```
+
+用途是读代码、搜符号、给本地补丁定位（`docs/re/` 里的分析就靠它）；**运行期不加载它**，编辑器仍然
+加载 `.cache/` 里的原 bundle。重新生成：`docs/re/tools/unpack_bundle.sh`。
+
 ## 数据
 
 | 项 | 位置 |
@@ -67,6 +81,7 @@ python3 md_selftest.py                                    # 自检（54 项，�
 | 你的文档 | `.data/store.json`（纯 JSON） |
 | 接口日志 | `.data/api.log`（仅方法/路径/长度） |
 | 编辑器资源 | `.cache/`（可删，删了要重新 `fetch_assets.py`） |
+| 还原出的源码 | `mathcha-src/`（阅读/定位用，不参与运行；可删，重新生成见上） |
 
 - **备份**：复制 `.data/store.json` 或整个 `.data/`。
 - **清空**：删掉 `.data/store.json`，下次启动自动建空文档。
@@ -84,8 +99,9 @@ mathcha-local/
 ├── assets.txt         # 静态资源清单（88 项）
 ├── chunks.txt         # 懒加载 chunk 清单（25 项）
 ├── cas-assets.txt     # CAS 引擎资源清单（8 项）
-├── docs/              # 说明文档（CAS 用法、白纸模式等）
+├── docs/              # 说明文档（CAS 用法、白纸模式、逆向分析笔记 docs/re/）
 ├── web/               # 本地前端扩展（白纸模式、#1/#2/#3 标题命令；server.py 注入）
+├── mathcha-src/       # 上游 bundle 还原出的可读模块（1416 个，阅读/定位用，运行时不加载）
 ├── .data/store.json   # 你的文档（唯一需要备份的文件）
 ├── .cache/            # 编辑器资源缓存（约 31 MB）
 └── screenshots/
@@ -111,3 +127,6 @@ mathcha-local/
 需要官方离线版可购买 [Mathcha Notebook](https://www.mathcha.io/notebook/)。
 
 CAS 引擎是 Pyodide（MPL-2.0）和 SymPy（BSD）的本地 wasm 副本，只随本机缓存使用，不对外分发。
+
+`mathcha-src/` 是从上游 bundle 还原出来的可读代码，版权归 Mathcha，仅用于本机研究/修改定位，
+不构成任何授权。
