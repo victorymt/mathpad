@@ -1,18 +1,17 @@
 /**
- * 编辑器增强：在正文（文本模式）里直接敲 LaTeX 风格的标题命令。
+ * 编辑器增强：在正文（文本模式）的空行行首直接敲 `#1` / `#2` / `#3` 生成层级标题。
  *
- *   \title1 一级标题内容
- *   \title2 二级标题内容
- *   \title3 三级标题内容
+ *   空行里敲 #1 → 该行变成一级标题（等同 Ctrl+Alt+1），接着输入就是标题内容
+ *   空行里敲 #2 → 二级标题   #3 → 三级标题
  *
- * 行为：这 7 个字符输入过程中不会进入文档；敲完 `\titleN` 的最后一个字符时，
- * 自动触发编辑器的「章节」命令（等同 Ctrl+Alt+1/2/3），把当前行变成对应级别标题，
- * 之后继续输入就是标题文字。
+ * 为什么不用 `\title1`：`\` 是编辑器的符号建议框触发键，在捕获阶段拦它会让 `\`
+ * 延迟 1.5s 才进编辑器（v1 的 bug）。`#` 在正文模式只是普通字符，没有冲突。
  *
  * 边界（刻意保守）：
- *   - 只在文本模式（root text-mode 行被选中）里生效；数学模式下的 `\frac` 等不受影响；
- *   - 带 Ctrl/Cmd/Alt 的组合键、IME 组合输入（中文输入法）、非单字符键全部放行；
- *   - 缓冲区不匹配（比如想写 `\theta`）会把已吞的字符原样回放，不丢字。
+ *   - 只在文本模式 + 当前行为空行时生效；数学模式、已有文字的行完全不拦；
+ *   - 带 Ctrl/Cmd/Alt 的组合键、IME 组合输入、非单字符键全部放行；
+ *   - 缓冲区不匹配（比如你想写 "#tag"）立即回放已吞字符，不丢字；
+ *   - 400ms 内没打出数字就回放，不会有"按键消失很久"的感觉。
  *
  * 由 server.py 注入到 editor.html，只在本机离线版生效，不改上游 bundle。
  */
@@ -20,12 +19,9 @@
   'use strict';
 
   var IS_MAC = /Mac|iPhone|iPad|iPod/.test(navigator.platform || '');
-  var PATTERNS = [
-    { text: '\\title1', level: 1 },
-    { text: '\\title2', level: 2 },
-    { text: '\\title3', level: 3 }
-  ];
-  var PREFIXES = PATTERNS.map(function (p) { return p.text; });
+  var LEVELS = { '1': 1, '2': 2, '3': 3 };
+  var TRIGGER = '#';
+  var TIMEOUT_MS = 400;
 
   var buffer = '';
   var timer = null;
@@ -37,37 +33,38 @@
     return list.length ? list[list.length - 1] : null;
   }
 
-  // 文本模式判定：取"最内层"的选中行（鼠标在行内数学里时，内层 line 也被标记 selected）。
-  // 只有最内层 line 带 text-mode 类才算正文；数学容器内的 line 没有这个类。
-  function inTextMode() {
+  // 取"最内层"的选中行；只有它带 text-mode 类才算正文（数学容器内的 line 没有这个类）
+  function selectedLine() {
     var sels = document.querySelectorAll('line.selected');
-    if (!sels.length) return false;
-    var deepest = sels[sels.length - 1];
-    return deepest.classList.contains('text-mode');
+    return sels.length ? sels[sels.length - 1] : null;
   }
 
-  function isPrefix(s) {
-    for (var i = 0; i < PREFIXES.length; i++) {
-      if (PREFIXES[i].indexOf(s) === 0) return true;
-    }
-    return false;
+  function inTextMode() {
+    var el = selectedLine();
+    return !!el && el.classList.contains('text-mode');
   }
 
-  function matchPattern(s) {
-    for (var i = 0; i < PATTERNS.length; i++) {
-      if (PATTERNS[i].text === s) return PATTERNS[i];
-    }
-    return null;
+  // 只在空行行首启用（避免吃掉正文里正常出现的 "#1"、"#tag"）
+  // 只看 <blocks> 里的内容，不算行首自动编号（section 行的 "1." 不算文字）
+  function isEmptyLine() {
+    var el = selectedLine();
+    if (!el) return false;
+    var blocksEl = el.querySelector('blocks');
+    var text = ((blocksEl || el).innerText || '').replace(/[\s\u00a0]/g, '');
+    return text.length === 0;
   }
 
-  // 回放被吞掉的字符：写进隐藏 textarea 并派发 input，等同用户敲入
+  function enabled() {
+    return inTextMode() && isEmptyLine();
+  }
+
   function replay(chars) {
     if (!chars) return;
     var ta = currentTextarea();
     if (!ta) return;
     ta.value = chars;
     ta.dispatchEvent(new Event('input', { bubbles: true }));
-    setTimeout(function () { if (ta.value) ta.value = ''; }, 80);
+    setTimeout(function () { if (ta.value) ta.value = ''; }, 60);
   }
 
   function applyHeading(level) {
@@ -87,17 +84,23 @@
     ta.dispatchEvent(ev);
   }
 
-  function resetBuffer(flush) {
-    if (buffer && flush !== false) replay(buffer);
-    buffer = '';
+  function clearTimer() {
     if (timer) { clearTimeout(timer); timer = null; }
   }
 
-  // 调试/自检用：window.__titleCommand.inTextMode() 可查当前是否在正文模式
+  function resetBuffer(flush) {
+    if (buffer && flush !== false) replay(buffer);
+    buffer = '';
+    clearTimer();
+  }
+
+  // 调试/自检用：window.__titleCommand.inTextMode() / pending()
   try {
     window.__titleCommand = {
       inTextMode: inTextMode,
-      pending: function () { return buffer; }
+      enabled: enabled,
+      pending: function () { return buffer; },
+      trigger: TRIGGER
     };
   } catch (err) { /* ignore */ }
 
@@ -105,31 +108,36 @@
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.isComposing || e.keyCode === 229) return;
     if (!e.key || e.key.length !== 1) return;
-    if (!inTextMode()) { resetBuffer(true); return; }
+
+    if (!enabled()) { resetBuffer(true); return; }
 
     var next = buffer + e.key;
-    if (!isPrefix(next)) {
-      // 不是标题命令：把吞掉的字符补回去，当前这次按键照常放行
+    // 空行行首：只拦 "#" 这一个个字符，以及随后的 1/2/3
+    var interesting =
+      (buffer === '' && next === TRIGGER) ||
+      (buffer === TRIGGER && !!LEVELS[next.charAt(1)]);
+
+    if (!interesting) {
+      // 不是命令：把吞掉的字符补回去，当前按键照常放行
       var swallowed = buffer;
       buffer = '';
-      if (timer) { clearTimeout(timer); timer = null; }
+      clearTimer();
       if (swallowed) replay(swallowed);
       return;
     }
 
-    // 仍是命令前缀：拦下，不交给编辑器
     e.preventDefault();
     e.stopPropagation();
     buffer = next;
 
-    if (timer) clearTimeout(timer);
-    timer = setTimeout(function () { resetBuffer(true); }, 1500);
-
-    var hit = matchPattern(buffer);
-    if (hit) {
+    if (LEVELS[next.charAt(1)]) {
+      clearTimer();
       buffer = '';
-      if (timer) { clearTimeout(timer); timer = null; }
-      applyHeading(hit.level);
+      applyHeading(LEVELS[next.charAt(1)]);
+      return;
     }
+
+    clearTimer();
+    timer = setTimeout(function () { resetBuffer(true); }, TIMEOUT_MS);
   }, true);
 })();
