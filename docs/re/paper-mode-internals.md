@@ -1,8 +1,8 @@
 # 白纸模式（Paper Mode）内部实现逆向
 
-> 分析对象：`.cache/cdn/bundle-f9164fb5-ced37e37.js`（6,042,564 B，单行，1416 个 webpack 模块）、
-> `.cache/cdn/styles-f9164fb5-ced37e37.css`（184,347 B，单行）、`.cache/cdn/index-f9164fb5-ced37e37.js`（19,917 B 加载器）、
-> `.cache/editor.html`（5,812 B 启动页）。
+> 分析对象：`assets/cdn/bundle-f9164fb5-ced37e37.js`（6,042,564 B，单行，1416 个 webpack 模块）、
+> `assets/cdn/styles-f9164fb5-ced37e37.css`（184,347 B，单行）、`assets/cdn/index-f9164fb5-ced37e37.js`（19,917 B 加载器）、
+> `assets/editor.html`（5,812 B 启动页）。
 >
 > 取证方式：纯静态。按 webpack 模块边界切段 grep（模块 id + 字节偏移），**未改代码、未开浏览器**。
 > 样式/脚本文件都是单行，所以本文引用「@字节偏移」而不是行号，复现方法见文末附录。
@@ -215,7 +215,7 @@ getDocumentWidth(){ var r=this.getTarget().state.mainModel.pageSettings?.pageSiz
 | `saveViewMode(e)` | `localStorage.setItem("mathcha-view-mode", e?"mobile":"desktop")` | 菜单 "Switch to mobile view" 用它；**要生效需刷新**（构造期读） |
 | `shouldUseBigBorder()` | `return this.isTestWithBigBorderAsPadding() \|\| !this.isTestEnv()` | 正常环境恒 `true` |
 | `isTestEnv()` | `location.href.indexOf("---test---")>=0` | |
-| `supportShowProminentShareButton()` | `getScreenWidth()>600 && !isElectronEnv()` | 600 断点；已被 server.py 补丁改成 `!1` |
+| `supportShowProminentShareButton()` | `getScreenWidth()>600 && !isElectronEnv()` | 600 断点；已被 src/server.py 补丁改成 `!1` |
 | `isDarkMode()`(env) | `location.href.indexOf("-dark-mode-")>=0` | 这是**文档/纸张**暗色，不是 UI 主题 |
 
 `isMobileOrTablet()` = true 时的影响（对白纸模式很重要）：
@@ -239,7 +239,7 @@ getDocumentWidth(){ var r=this.getTarget().state.mainModel.pageSettings?.pageSiz
 | 参数 | 读取处 | 语义 |
 |---|---|---|
 | `embedded` | `isEmbedded(){return !!this.queryMap.embedded}` | 嵌入模式（见 §3.4，**不可用于白纸模式**） |
-| `cas-support` | `this.casSupport=!!queryMap["cas-support"]` | 打开 fx CAS 面板（server.py 已打补丁恒 true） |
+| `cas-support` | `this.casSupport=!!queryMap["cas-support"]` | 打开 fx CAS 面板（src/server.py 已打补丁恒 true） |
 | `math-white-bg` | `this.mathWhiteBg=!!queryMap["math-white-bg"]` | **只**给 composite block 加白底：module 67928 `getCompositeBlockStyle(){... b.A.mathWhiteBg&&(e.backgroundColor="white")}`；不是整页白纸 |
 | `enable-page-view` | `this.enablePageView=...` | 唯一使用点 `renderPageView(){Xe.A.enablePageView}`（module 11154 @1,947,448）**没有实际渲染** → 死参数 |
 | `graphing-disabled` | 同上 | 关图形计算 |
@@ -253,14 +253,14 @@ getDocumentWidth(){ var r=this.getTarget().state.mainModel.pageSettings?.pageSiz
 **没有任何 `readonly` / `itemsBarHide` / `mathTypeHidden` / `dock` 的 URL 参数**。【已核实】
 `itemsBarHide`、`hidden` 是 React prop（由 store / 文档状态传入），不由 URL 控制。
 
-### 3.2 `mathGlobal` 配置（server.py 现有注入点，比改 bundle 更干净）
+### 3.2 `mathGlobal` 配置（src/server.py 现有注入点，比改 bundle 更干净）
 
-【已核实】`.cache/editor.html` 里：
+【已核实】`assets/editor.html` 里：
 
 ```html
 <script>
   var g_ver_num=422; var g_version="f9164fb5-ced37e37";
-  var mathGlobal = { appMode: "main" }      // server.py 已在此行后插 shareDisabled:true, accountDisabled:true
+  var mathGlobal = { appMode: "main" }      // src/server.py 已在此行后插 shareDisabled:true, accountDisabled:true
 </script>
 <script src="https://cdn.mathcha.io/index-f9164fb5-ced37e37.js"></script>
 ```
@@ -320,7 +320,7 @@ licenseManagement(){...} windowControls(){...}
 
 - **URL 参数**：不能改变 UI 极简程度（只有 `embedded` 会大改布局，但是只读）；`math-white-bg` 只管公式块白底；
   `-side-bar-off-` / `---test---` / `-dark-mode-` 这类是 `location.href` 子串判断（**路径里出现才生效**，我们的 `/editor` 路由不带），
-  除非改 server.py 让 `/editor-side-bar-off-` 也能返回页面（不推荐，侵入路由）。
+  除非改 src/server.py 让 `/editor-side-bar-off-` 也能返回页面（不推荐，侵入路由）。
 - **配置（mathGlobal）**：`hideMenu` 只能把 header 的菜单换占位，不能隐藏 header。
 - **设置（用户设置/侧栏）**：侧栏显隐不落 localStorage，本机离线没有持久位。
 - **结论**：**唯一能持久化"极简布局"的入口就是内置 fullScreen + 我们自己的 localStorage 标记**。这也印证了任务书的方向。
@@ -432,7 +432,7 @@ getCommandFrom(e,t){ if(!e.metaKey&&!e.ctrlKey&&!e.altKey&&this.isAlphaBetaNumbe
 【已核实】`editor.html` 里**没有** `<link rel=stylesheet href=...styles-*.css>`。主样式表是加载器在运行时拉取并 append 的：
 
 ```js
-// .cache/cdn/index-f9164fb5-ced37e37.js @15,645
+// assets/cdn/index-f9164fb5-ced37e37.js @15,645
 function setStyle(e){ var n=document.createElement("style");
   n.type="text/css"; n.styleSheet?n.styleSheet.cssText=e:n.appendChild(document.createTextNode(e));
   document.head.appendChild(n) }
@@ -441,7 +441,7 @@ function loadMainStyle(){ return loadAjax(cdnPrefix+"/styles-"+mathGlobal.versio
 window.Promise.all([loadAjax(cdnPrefix+"/bundle-"+mathGlobal.version+".js"), loadMainStyle(), loadIconFonts()]...)
 ```
 
-而 server.py 的 `HIDE_CSS` 是插在 `</head>` 之前 → **我们的 `<style>` 出现在应用主样式表之前**。
+而 src/server.py 的 `HIDE_CSS` 是插在 `</head>` 之前 → **我们的 `<style>` 出现在应用主样式表之前**。
 CSS 层叠同特异度时后者胜 → 我们必须在**特异度或 `!important`** 上做文章（`html.paper-mode xxx` 前缀通常够，但用 `!important` 更省心）。
 
 ⚠️ 另一层：bundle 里的 webpack 运行时也会懒加载 CSS chunk —— `s.miniCssF=e=>({270:"518a4946…",409:"544cc91b…"}[e]+"."+e+".bundle.css")`
@@ -680,7 +680,7 @@ html.paper-mode .doc-scroll-container::-webkit-scrollbar   {width:0!important; h
 
 ### 7.3 注入骨架（仅供参考，不是本次改动）
 
-CSS（由 server.py 的 `HIDE_CSS` 之后追加，或单独一段注入）：
+CSS（由 src/server.py 的 `HIDE_CSS` 之后追加，或单独一段注入）：
 
 ```css
 html.paper-mode{--ui-workspace:#fff!important}
@@ -787,7 +787,7 @@ JS（注入到 `</body>` 前的普通 `<script>`，不打包、不动 bundle）�
 ## 附录 B：复现命令
 
 ```bash
-cd /data/project/BTW/mathcha-local/.cache/cdn
+cd /data/project/BTW/mathcha-local/assets/cdn
 
 # JS：按 webpack 模块边界定位符号归属（bundle 是单行，先建边界索引再 bisect）
 python3 - <<'PY'

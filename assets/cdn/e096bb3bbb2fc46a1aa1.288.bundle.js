@@ -1,0 +1,1 @@
+(self.webpackChunkmathcha=self.webpackChunkmathcha||[]).push([[288],{94887(a,e,h){"use strict";h.r(e),h.d(e,{default:()=>c});var s=h(72151),t=h.n(s);t().register([h(41988),h(54587),h(86764),h(48806),h(87100),h(87209),h(12143),h(45442),h(65283)]);const c=t()},47790(){}}]);

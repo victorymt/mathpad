@@ -1,5 +1,5 @@
-# mathcha-src/ 是第三方 bundle 的还原产物：
+# src/mathcha/ 是第三方 bundle 的还原产物：
 # - linguist-vendored：不计入 GitHub 语言统计
 # - linguist-generated：diff 默认折叠，避免 1416 个文件淹没代码评审
-mathcha-src/modules/*.js linguist-vendored linguist-generated
-mathcha-src/index.json linguist-generated
+src/mathcha/modules/*.js linguist-vendored linguist-generated
+src/mathcha/index.json linguist-generated

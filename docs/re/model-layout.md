@@ -1,7 +1,7 @@
 # 数学模型与排版引擎（task-1）
 
-分析对象：`.cache/cdn/bundle-f9164fb5-ced37e37.js` 拆出的 `mathcha-src/modules/*.js`、
-`.cache/cdn/styles-f9164fb5-ced37e37.css`、`.cache/cdn/resources/fonts-*.css`。
+分析对象：`assets/cdn/bundle-f9164fb5-ced37e37.js` 拆出的 `src/mathcha/modules/*.js`、
+`assets/cdn/styles-f9164fb5-ced37e37.css`、`assets/cdn/resources/fonts-*.css`。
 约定：`11154.js:24129` 表示「module 11154 第 24129 行」；【已核实】=直接看到实现/表数据；
 【推测】=由实现合理外推但没逐行确认。
 
@@ -52,7 +52,7 @@
 
 **模型侧**：`LaTeX 字符串` --(PEG parser 28623 / 模板注册表 98095 `getModelByInfo`)-->
 `composite/single/text block` --(插入服务 41587 `insertInput` → 模型编辑原语 13620 `insertModelAt`)-->
-`{id,lines,blocks}` 树（存进 .data/store.json）。
+`{id,lines,blocks}` 树（存进 data/store.json）。
 
 **渲染侧**：模型树 → React 组件树（`<math-type>` 容器 → `<line>` → `<blocks><baselineblock/>` +
 每个 block 的 `getViewComponent()`）→ 浏览器 CSS 流式布局（float/flex/em margin/字号缩放）
@@ -624,8 +624,8 @@ r.setLineCacheSize(this.props.parentEditAreaId, t.id, p);
 
 ## 附：证据脚本/中间产物
 
-- `.cache/re/scratch/model-layout_slots_final.json`：从 98095 注册表抽取的 33 个带槽 composite
+- `assets/re/scratch/model-layout_slots_final.json`：从 98095 注册表抽取的 33 个带槽 composite
   （module、latex 名、槽名、keyInsertOnSelection）。
-- `.cache/re/scratch/model-layout_css_rules.json`：从 `styles-f9164fb5-ced37e37.css` 拆出的 1770 条规则
+- `assets/re/scratch/model-layout_css_rules.json`：从 `styles-f9164fb5-ced37e37.css` 拆出的 1770 条规则
   （`[selector, body]`），用于检索 `fraction-symbol/sqrt-symbol/big-delimiter/power-index/opensymbolblock/block.Binary` 等。
-- `.cache/re/scratch/model-layout_extract_slots3.py / _extract_slots4.py`：抽取脚本。
+- `assets/re/scratch/model-layout_extract_slots3.py / _extract_slots4.py`：抽取脚本。

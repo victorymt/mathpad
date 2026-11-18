@@ -2,7 +2,7 @@
   "version": 1,
   "generatedAt": "2026-11-15",
   "purpose": "Markdown 导入器要写进模型的字段规格。只记录『能落库、能渲染』的事实，不记录猜测。",
-  "method": "浏览器实测（127.0.0.1:7801/editor）：用 CDP 驱动合成 KeyboardEvent 打快捷键 + 往隐藏 textarea 派发 input 事件打字，然后从 .data/store.json 抄保存后的真实模型。标 source 的条目来自 .cache/cdn/bundle-f9164fb5-ced37e37.js 源码核对。",
+  "method": "浏览器实测（127.0.0.1:7801/editor）：用 CDP 驱动合成 KeyboardEvent 打快捷键 + 往隐藏 textarea 派发 input 事件打字，然后从 data/store.json 抄保存后的真实模型。标 source 的条目来自 assets/cdn/bundle-f9164fb5-ced37e37.js 源码核对。",
   "samples": "同目录 md-encoding-samples.json（8 个探针文档的完整模型原文）",
   "evidenceLevels": {
     "browser": "在编辑器里实际操作 → 保存 → 抄模型",
@@ -22,7 +22,7 @@
     },
     "notes": [
       "av 是模型结构版本号，客户端每次改模型 +1，用于让 delayRenderCache 失效；新导入文档给任意小整数（如 1）即可，不需要 delayRenderCache",
-      "新建空文档的骨架就是 local_api.new_doc_json()：2 个空行 + pageSettings.pageSize.width=700"
+      "新建空文档的骨架就是 src/api.py new_doc_json()：2 个空行 + pageSettings.pageSize.width=700"
     ]
   },
 
@@ -165,6 +165,6 @@
     "启动": "python3 server.py 7801 → http://127.0.0.1:7801/editor?paper=0",
     "打字": "隐藏 textarea 派发 input 事件（app 的 onInput 读取 value 后自己清空）；多字符要逐字符打，否则 $ 这类单字符快捷语法不触发",
     "快捷键": "document/textarea 上派发合成 KeyboardEvent（keyCode 必填），bundle 用 keyCode + ctrlKey/altKey/shiftKey 判定",
-    "取证": "操作完 Ctrl+S 或等自动保存，然后读 .data/store.json 里对应文档的 data 字段（JSON 字符串）"
+    "取证": "操作完 Ctrl+S 或等自动保存，然后读 data/store.json 里对应文档的 data 字段（JSON 字符串）"
   }
 }

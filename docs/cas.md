@@ -2,7 +2,7 @@
 
 选中一段公式，点浮动工具条上的 **fx**，就打开 CAS 面板。面板里是 33 个 SymPy 操作：化简、因式分解、求导、积分、极限、求和、解方程、矩阵运算等。结果插回文档，还是可编辑的公式。
 
-全部在本机跑：Pyodide（WebAssembly 里的 Python 3.14.0）+ SymPy 1.14.0 + mpmath 1.4.1，资源在 `.cache/`，不联网。
+全部在本机跑：Pyodide（WebAssembly 里的 Python 3.14.0）+ SymPy 1.14.0 + mpmath 1.4.1，资源在 `assets/`，不联网。
 
 ## 快速上手
 
@@ -31,7 +31,7 @@
 | 记忆 | 开关状态、停靠形态、尺寸、各字段内容、终端可见性都存在浏览器 IndexedDB（库 `MathchaCasDialog`），刷新页面后自动恢复打开 |
 | 终端历史 | 存在浏览器 localStorage（`sympy-cmd-history`） |
 
-注意：这些浏览器状态不在 `.data/` 里。换端口或清站点数据会丢，文档内容不受影响。
+注意：这些浏览器状态不在 `data/` 里。换端口或清站点数据会丢，文档内容不受影响。
 
 ## 输入是什么
 
@@ -63,7 +63,7 @@ Current selection is not in math mode, so this CAS action cannot run.
 | 项 | 说明 |
 |---|---|
 | 插入位置 | 插在**当前公式所在的那个数学块内部**，紧接原式之后。在 display 数学区里看起来就是下一行；原式保留不动 |
-| 结果形态 | 普通 Mathcha 公式块，不是 LaTeX 字符串。可以继续编辑，随文档保存到 `.data/store.json`，走同一套导出（SVG / PNG / PDF / TikZ / LaTeX） |
+| 结果形态 | 普通 Mathcha 公式块，不是 LaTeX 字符串。可以继续编辑，随文档保存到 `data/store.json`，走同一套导出（SVG / PNG / PDF / TikZ / LaTeX） |
 | 链式语义 | 运行成功后，选区/光标落在**新插入的结果**上。接着点别的操作，是对上一步结果继续算。要换对象，先重新选中公式 |
 | Solve | 填了变量时，结果前面带 `变量 =`，例如 `x = [-3, 3]` |
 | 矩阵 | 结果保留矩阵结构和括号样式 |
@@ -233,7 +233,7 @@ CAS Engine (using SymPy) is Loading ...
 
 | 限制 | 说明 |
 |---|---|
-| 完全离线 | 只加载 `.cache/` 里缓存的 Pyodide + SymPy。不能联网装包，所以用不到没有随附的第三方 Python 包 |
+| 完全离线 | 只加载 `assets/` 里缓存的 Pyodide + SymPy。不能联网装包，所以用不到没有随附的第三方 Python 包 |
 | 输入受转换器限制 | 只处理选区里的 Mathcha 公式块，不是任意 LaTeX；纯文本选区用不了 |
 | 一次一个对象 | 每次操作只作用于当前选区（或光标所在的那一行）的一条公式。多行选区没有验证；拿不准时先选一行公式再跑 |
 | 链式语义 | 结果插回后光标在结果上，连续点操作是对上一结果继续算。换对象要重新选中 |
@@ -241,26 +241,26 @@ CAS Engine (using SymPy) is Loading ...
 | 精度与特殊函数 | 面板没有精度设置，算法和精度由 SymPy 1.14.0 决定；复数、特殊函数、数值近似都由 SymPy 处理，面板不额外加工 |
 | 终端权限 | 终端能执行任意 Python（在浏览器 wasm 沙箱里，CSP 禁网），别跑不可信代码 |
 | 没有按钮的运算 | 微分方程、物理量、数值积分的参数调整等没有对应按钮。终端里可以自己写 SymPy，但结果能不能转回公式，取决于公式转换器 |
-| 浏览器状态 | 面板位置、字段内容、终端历史存在浏览器里，不在 `.data/` |
+| 浏览器状态 | 面板位置、字段内容、终端历史存在浏览器里，不在 `data/` |
 
 ## 和现有公式功能的衔接
 
 - 输入是文档里的公式块，输出也是公式块。中间没有导入导出的格式转换。
-- 结果随文档自动保存（接口还是 `PUT /api/documents/<id>/content`），`.data/store.json` 格式不变。
+- 结果随文档自动保存（接口还是 `PUT /api/documents/<id>/content`），`data/store.json` 格式不变。
 - 结果和手打的公式一样，参与 SVG / PNG / PDF / TikZ / LaTeX 导出。
 - CAS 只增加「选区 + 操作按钮」这一层，不改变编辑器原有的输入、渲染、保存、导出流程。
 
 ## 和项目结构、配置的一致性
 
-CAS 沿用项目原有的离线做法：CDN 资源镜像到 `.cache/cdn`，`server.py` 只读缓存并打少量补丁。
+CAS 沿用项目原有的离线做法：CDN 资源镜像到 `assets/cdn`，`src/server.py` 只读缓存并打少量补丁。
 
 | 文件 | CAS 相关变化 |
 |---|---|
 | `cas-assets.txt` | 新增，CAS 引擎资源清单，与 `assets.txt` / `chunks.txt` 同风格：注释行 + 每行一个完整 URL |
-| `fetch_assets.py` | 下载 `cas-assets.txt` 里的 8 个文件；仍是唯一联网脚本；已存在则跳过，`--force` 强制重下 |
-| `server.py` | 新增 `/cas-sympy-module-worker.js` 和 `/resources/pyodide/*` 路由，从 `.cache/cdn` 读（gzip 自动解压）；补 `.wasm` / `.whl` / `.zip` / `.mjs` 的 MIME；CSP 增加 `'wasm-unsafe-eval'`；CAS 资源齐全时把 bundle 里的 `casSupport` 补丁打开 |
+| `tools/fetch_assets.py` | 下载 `cas-assets.txt` 里的 8 个文件；仍是唯一联网脚本；已存在则跳过，`--force` 强制重下 |
+| `src/server.py` | 新增 `/cas-sympy-module-worker.js` 和 `/resources/pyodide/*` 路由，从 `assets/cdn` 读（gzip 自动解压）；补 `.wasm` / `.whl` / `.zip` / `.mjs` 的 MIME；CSP 增加 `'wasm-unsafe-eval'`；CAS 资源齐全时把 bundle 里的 `casSupport` 补丁打开 |
 | `start.sh` | 不变 |
-| 启动输出 | `server.py` 启动时打印 `CAS: 就绪（本地 Pyodide + SymPy，选中公式后点 fx）` 或 `CAS: 未安装（跑一次 python3 fetch_assets.py 补齐 CAS 资源）` |
+| 启动输出 | `src/server.py` 启动时打印 `CAS: 就绪（本地 Pyodide + SymPy，选中公式后点 fx）` 或 `CAS: 未安装（跑一次 npm run fetch 补齐 CAS 资源）` |
 
 CAS 资源共 8 个文件，磁盘 11,011,935 B（约 11 MB，CDN 原始 gzip 字节），解压后约 18 MB：
 
@@ -273,14 +273,14 @@ CAS 资源共 8 个文件，磁盘 11,011,935 B（约 11 MB，CDN 原始 gzip �
 - `resources/pyodide/sympy-1.14.0-py3-none-any.whl`
 - `resources/pyodide/mpmath-1.4.1-py3-none-any.whl`
 
-资源缺失时，`server.py` 不打开 `casSupport`，fx 按钮就不显示，其他功能照常。这是有意的降级：缺资源不报错，只是没有 CAS 入口。
+资源缺失时，`src/server.py` 不打开 `casSupport`，fx 按钮就不显示，其他功能照常。这是有意的降级：缺资源不报错，只是没有 CAS 入口。
 
 ## 排查
 
 | 现象 | 处理 |
 |---|---|
-| 选公式点 fx，面板一直转圈 | 联网跑一次 `python3 fetch_assets.py` 补 CAS 资源（约 11 MB） |
-| 一直转圈，资源也补过 | 看 `.data/cache-misses.log` 缺哪个 `/resources/pyodide/...`，按实际文件名补进 `cas-assets.txt` 后重跑 |
+| 选公式点 fx，面板一直转圈 | 联网跑一次 `npm run fetch` 补 CAS 资源（约 11 MB） |
+| 一直转圈，资源也补过 | 看 `data/cache-misses.log` 缺哪个 `/resources/pyodide/...`，按实际文件名补进 `cas-assets.txt` 后重跑 |
 | 控制台报 `Could not initialize CAS worker` | 同上，先查资源是否齐、CSP 是否生效 |
 | 没有 fx 按钮 | 先确认选区是数学模式（文本里选不中公式）；再确认启动日志是 `CAS: 就绪` |
 | 某个运算失败 | 看对应操作卡片底部的红条，点 Details 看完整 traceback。常见原因：选区不是数学公式、不是矩阵却跑矩阵操作、方程没有解析解 |
@@ -288,4 +288,4 @@ CAS 资源共 8 个文件，磁盘 11,011,935 B（约 11 MB，CDN 原始 gzip �
 
 ## 引擎与许可
 
-CAS 引擎是 Pyodide（MPL-2.0）和 SymPy（BSD）的本地副本，随 `.cache/` 缓存在本机使用，不对外分发。
+CAS 引擎是 Pyodide（MPL-2.0）和 SymPy（BSD）的本地副本，随 `assets/` 缓存在本机使用，不对外分发。

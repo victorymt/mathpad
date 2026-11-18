@@ -2,18 +2,18 @@
 
 > 目的：在写 Markdown 导入器之前，先把「Markdown 语法落到模型的哪个字段才真的能渲染」用实测钉死。
 > 结论以 `docs/re/data/md-encoding.json` 为准（机器可读），本文是过程与证据。
-> 原始模型样本：`docs/re/data/md-encoding-samples.json`（8 个探针文档完整模型，探针文档已从 `.data/store.json` 删除）。
+> 原始模型样本：`docs/re/data/md-encoding-samples.json`（8 个探针文档完整模型，探针文档已从 `data/store.json` 删除）。
 
 ## 1. 方法
 
 浏览器实测，而不是读代码猜：
 
-1. `python3 server.py 7801`，打开 `http://127.0.0.1:7801/editor?paper=0`；
+1. `npm run dev`（或 `python3 src/server.py 7801`），打开 `http://127.0.0.1:7801/editor?paper=0`；
 2. 用 CDP 在页面里驱动操作：
    - **打字**：往隐藏 `textarea` 派发 `input` 事件（app 的 `onInput` 读 `value` 后自己清空）；
    - **快捷键**：在 `textarea` 上派发合成 `KeyboardEvent`（bundle 用 `keyCode` + `ctrlKey/altKey/shiftKey` 判定，合成事件可用）；
 3. 每次操作后读 DOM 类名/`<prefix>` 印证渲染，再 `Ctrl+S` 保存；
-4. 从 `.data/store.json` 抄出该文档 `data` 字段的**真实模型 JSON** —— 这是唯一可信的证据来源。
+4. 从 `data/store.json` 抄出该文档 `data` 字段的**真实模型 JSON** —— 这是唯一可信的证据来源。
 
 两个自动化坑（不影响结论，但复现时要注意）：
 
@@ -148,6 +148,6 @@ async function typeChars(s) {              // 逐字符输入
 
 ## 6. 附带产物与清理
 
-- 探针期间通过 `/api/document` 建的 8 个文档（`md-probe*`、`md-p-*`）已从 `.data/store.json` 删除；
+- 探针期间通过 `/api/document` 建的 8 个文档（`md-probe*`、`md-p-*`）已从 `data/store.json` 删除；
 - 完整模型原文保留在 `docs/re/data/md-encoding-samples.json`，可直接当回归 fixture 用；
-- 探针前备份：`.data/store.json.bak-122923`（内容为探针前的空文档状态）。
+- 探针前备份：`data/store.json.bak-122923`（内容为探针前的空文档状态）。

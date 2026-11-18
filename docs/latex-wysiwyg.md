@@ -1,7 +1,7 @@
 # mathcha-local 里「LaTeX 所见即所得」是怎么实现的
 
-> 分析对象：本仓库离线运行的 Mathcha 编辑器，版本 `f9164fb5-ced37e37`（`.cache/cdn/bundle-f9164fb5-ced37e37.js`，6.04 MB，webpack 5，1416 个模块）。
-> 结论取证方式：把 bundle 按 webpack 模块拆成可读 JS（`mathcha-src/modules/`，脚本 `docs/re/tools/split_bundle.mjs`）+ 浏览器里实测输入/导出/看 DOM。
+> 分析对象：本仓库离线运行的 Mathcha 编辑器，版本 `f9164fb5-ced37e37`（`assets/cdn/bundle-f9164fb5-ced37e37.js`，6.04 MB，webpack 5，1416 个模块）。
+> 结论取证方式：把 bundle 按 webpack 模块拆成可读 JS（`src/mathcha/modules/`，脚本 `tools/split_bundle.mjs`）+ 浏览器里实测输入/导出/看 DOM。
 > 详细笔记在 `docs/re/`：模型与排版 `model-layout.md`、输入管线 `input-editing.md`、LaTeX 互转 `latex-io.md`、渲染与字体 `render-fonts.md`。
 
 ---
@@ -23,7 +23,7 @@
               ├─ 普通字符 ─────────────► 插入文本块 {id,text:"a"}
               └─ "\" → 建议框 → Enter ─► 插入模板 composite {text:"\frac", elements:{value,sub1}}
                                                         │
-模型树 {id, lines:[{id, blocks:[...]}]}  ◄──────────────┘   （保存到 .data/store.json）
+模型树 {id, lines:[{id, blocks:[...]}]}  ◄──────────────┘   （保存到 data/store.json）
               │
               ▼  React 渲染
 <line><blocks><block>…</block><compositeblock class="fraction-symbol">…</compositeblock>
@@ -41,18 +41,18 @@
 
 | 文件 | 作用 |
 |---|---|
-| `server.py` | 托管 `.cache/cdn/` 里的上游资源；把资源里的 `https://cdn.mathcha.io/...` 重写成 `/cdn/...`；CSP 禁止联网；少量 DOM/JS 补丁（隐藏分享按钮、默认打开 CAS 面板） |
-| `local_api.py` | 用本地 JSON 实现客户端的 `/api/*`：文档树、`init2`、`active2`、文档内容保存（`.data/store.json`） |
-| `fetch_assets.py` | 唯一联网脚本：首次安装时把 bundle/字体/懒加载 chunk 下到 `.cache/` |
+| `src/server.py` | 托管 `assets/cdn/` 里的上游资源；把资源里的 `https://cdn.mathcha.io/...` 重写成 `/cdn/...`；CSP 禁止联网；少量 DOM/JS 补丁（隐藏分享按钮、默认打开 CAS 面板） |
+| `src/api.py` | 用本地 JSON 实现客户端的 `/api/*`：文档树、`init2`、`active2`、文档内容保存（`data/store.json`） |
+| `tools/fetch_assets.py` | 唯一联网脚本：首次安装时把 bundle/字体/懒加载 chunk 下到 `assets/` |
 
-- WYSIWYG 的全部实现都在 `.cache/cdn/bundle-f9164fb5-ced37e37.js` 里（以及 `.cache/cdn/styles-*.css`、`resources/fonts-*.css`、`fonts/*.otf`）。
+- WYSIWYG 的全部实现都在 `assets/cdn/bundle-f9164fb5-ced37e37.js` 里（以及 `assets/cdn/styles-*.css`、`resources/fonts-*.css`、`fonts/*.otf`）。
 - `obsidian-mathpad/` 是另一个独立插件仓库（Obsidian 的 CAS 插件，渲染直接调 Obsidian 的 `renderMath`），**与本编辑器的所见即所得无关**。
 
 ---
 
 ## 2. 数据模型：公式是一棵「槽位树」
 
-实测敲 `$` 进公式、`\frac` 插入模板、分子填 `a`、`Tab` 到分母填 `b` 后，客户端自动保存到 `.data/store.json` 的原文（节选）：
+实测敲 `$` 进公式、`\frac` 插入模板、分子填 `a`、`Tab` 到分母填 `b` 后，客户端自动保存到 `data/store.json` 的原文（节选）：
 
 ```json
 {
@@ -231,7 +231,7 @@ keydown keyCode 220 ("\")            ← 或 onInput 收到 value=="\\"
 
 ### 4.2 每种结构一个 CSS 类，几何是"手调 em 常数"
 
-主样式表 `.cache/cdn/styles-*.css`（184 KB）里是成体系的符号类：
+主样式表 `assets/cdn/styles-*.css`（184 KB）里是成体系的符号类：
 
 ```css
 .fraction-symbol{margin-left:.1em;margin-right:.1em}
@@ -305,7 +305,7 @@ SVG 尺寸不是猜的：组件 `12481 <SvgDrawing>` 先渲染空 svg 撑满容�
 
 ### 4.6 字体体系
 
-- `resources/fonts-<hash>.css` 里有 **61 条 `@font-face`**，全部指向本地 `/fonts/**.otf`；编辑器的 `@font-face` 路径上游写的是 `https://cdn.mathcha.io/...`，本地由 `server.py` 的 `_rewrite_cdn()` 改写成 `/cdn/...`，离线才生效。
+- `resources/fonts-<hash>.css` 里有 **61 条 `@font-face`**，全部指向本地 `/fonts/**.otf`；编辑器的 `@font-face` 路径上游写的是 `https://cdn.mathcha.io/...`，本地由 `src/server.py` 的 `_rewrite_cdn()` 改写成 `/cdn/...`，离线才生效。
 - 家族：`Asana` / `Asana-Math`（数学模式主字体）、`LatinModern(-Math)`、`ThickerLm(-Math)`、Computer Modern 文本字体、`Sans*`，以及 **每种数学样式一份**的 `*-Mathbb/-Mathit/-Mathcal/-Mathscr/-Mathfrak/-Mathsf/-Mathtt/-Mathrm`。
   - `types-generated/*.otf` 是**构建期产物**：字形直接映射到 ASCII（如 `Asana-mathbb.otf` 把 `0-9A-Za-z` 映射成双线体），所以 `\mathbb{R}` 是"字符 R + `font-family:Asana-Mathbb`"。
   - `*-mode.otf` 是"构造字体"：只含 ASCII 数学字母 + `U+239B..` 的扩展件 + Mathcha 自定义部件槽（`U+23D0..U+243F`），并重调了 advance，好让 CSS 里竖排拼合无缝。
@@ -424,7 +424,7 @@ SVG 尺寸不是猜的：组件 `12481 <SvgDrawing>` 先渲染空 svg 撑满容�
 
 ## 8. 代码地图（模块 id → 作用）
 
-> `mathcha-src/modules/<id>.js` 是拆包后可读源码；`docs/re/tools/split_bundle.mjs` 可重新生成。
+> `src/mathcha/modules/<id>.js` 是拆包后可读源码；`tools/split_bundle.mjs` 可重新生成。
 
 | module | 作用 |
 |---|---|
@@ -449,12 +449,12 @@ SVG 尺寸不是猜的：组件 `12481 <SvgDrawing>` 先渲染空 svg 撑满容�
 
 ## 9. 这份报告是怎么来的（可复现）
 
-1. `.cache/cdn/bundle-f9164fb5-ced37e37.js` 是单行 6.04 MB 的 webpack 5 产物。用 `@babel/parser` 解析后按"数字键 + `(e,t,r)` 工厂函数"抽出模块表，拆成 1416 个文件（`mathcha-src/modules/<id>.js`，局部变量被压缩但**属性名/方法名未混淆**，可直接 grep）。
-2. 把关键模块与 `.cache/cdn/styles-*.css`、`resources/fonts-*.css`、`fonts/*.otf` 对照阅读，得到模型/渲染/互转的主体结论。
+1. `assets/cdn/bundle-f9164fb5-ced37e37.js` 是单行 6.04 MB 的 webpack 5 产物。用 `@babel/parser` 解析后按"数字键 + `(e,t,r)` 工厂函数"抽出模块表，拆成 1416 个文件（`src/mathcha/modules/<id>.js`，局部变量被压缩但**属性名/方法名未混淆**，可直接 grep）。
+2. 把关键模块与 `assets/cdn/styles-*.css`、`resources/fonts-*.css`、`fonts/*.otf` 对照阅读，得到模型/渲染/互转的主体结论。
 3. 在浏览器（`http://127.0.0.1:7801/editor`）实测：敲 `$`→`\frac`→a→Tab→b 看 DOM/模型；用 Menu → Import from Latex 导入覆盖性公式，再 Menu → Export Selection to Latex 取真实导出文本；逐个测 `\[..\]`/`\(..\)`/`$..$`/`equation`/未知命令。
 4. 详细证据（带 module id、符号名、行号、≤15 行片段）在 `docs/re/`：
    - `docs/re/model-layout.md`（631 行）：模型、槽位表、排版与修补
    - `docs/re/input-editing.md`（300 行）：键盘/IME/建议框/光标/撤销
    - `docs/re/latex-io.md`（410 行）：导入导出、映射表、离线 PEG harness 验证
    - `docs/re/render-fonts.md`（358 行）：DOM/字体/度量/导出
-   - `docs/re/tools/split_bundle.mjs`：拆包脚本
+   - `tools/split_bundle.mjs`：拆包脚本

@@ -1,6 +1,6 @@
 # Mathcha 公式「所见即所得输入」管线（task-2）
 
-分析对象：`mathcha-src/modules/*.js`（由 `.cache/cdn/bundle-f9164fb5-ced37e37.js` 按 webpack moduleId 拆出）。
+分析对象：`src/mathcha/modules/*.js`（由 `assets/cdn/bundle-f9164fb5-ced37e37.js` 按 webpack moduleId 拆出）。
 符号名（属性名/方法名）未被混淆，局部变量被压缩；文中 `11154:7445` 之类表示 module 文件:行号。
 【已核实】= 直接读到实现；【推测】= 由相邻代码/命名推断，未跑动态验证。
 
@@ -8,7 +8,7 @@
 
 ## 结论速览
 
-1. 【已核实】输入不是 contenteditable。编辑器根节点是自定义元素 `<math-type>`，内部放一个**视觉上 0×0 的隐藏 `<textarea>`**（`<hidden-input-wrapper>` 内）承接键盘/输入法，另有一个 `readOnly` 的 `<input class="focus-element">` 只做焦点与 keydown 镜像。见 `11154:25783-25817`、CSS `hidden-input-wrapper{width:0;height:0;…transform:scale(0)}`（`.cache/cdn/styles-f9164fb5-ced37e37.css`）。
+1. 【已核实】输入不是 contenteditable。编辑器根节点是自定义元素 `<math-type>`，内部放一个**视觉上 0×0 的隐藏 `<textarea>`**（`<hidden-input-wrapper>` 内）承接键盘/输入法，另有一个 `readOnly` 的 `<input class="focus-element">` 只做焦点与 keydown 镜像。见 `11154:25783-25817`、CSS `hidden-input-wrapper{width:0;height:0;…transform:scale(0)}`（`assets/cdn/styles-f9164fb5-ced37e37.css`）。
 2. 【已核实】键盘总入口是 `keyboardInputHandler = new Wi(this)`（11154:7445 定义、24659 装配）。`onEditorKeyDown`(7454) 先处理 Alt/Enter 特例，再 `handleShortcut()`（用户自定义热键宏），最后把事件交给 `controller.handleKey(e, containerModel)`（`Wr.handleKey`，11154:3718），由 `target.handleResult(result, e)` 落地。
 3. 【已核实】**普通字符不走 handleKey**：keydown 里 `nt.getCommandFrom()`（11154:1458）对无修饰键的 0-9/A-Z 直接返回 `{action:null}`，真正的文字来自 textarea 的 `onInput` → `onEditorInput`(7516) → `controller.handleTextInput(value, containerModel)`(3923) → `insertInput(text)` → `R.A.insertInput`(41587:278)。所以"键盘事件"和"字符事件"是两条道。
 4. 【已核实】文本 vs 数学**不是输入模式开关**，而是"光标此刻在哪个容器里"：`ContainerModel.isTextModeSelected()`(24245) ← `modelDetect()` ← `Eu.scan/traverseDown/determineAtCompositeLeaf`(24002-24070)；命中 `\text-mode-group`、`\theorem`、表格 caption、`\raw-latex`、`\code-section`、`\boxed-container`、`\underline-section`、图片/图 caption 等才算 text，否则 math。同一个输入函数，只换容器与样式。

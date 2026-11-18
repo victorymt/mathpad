@@ -10,7 +10,7 @@
 
 | 项 | 值 |
 |---|---|
-| 被测实例 | `http://127.0.0.1:7899/editor`（隔离实例，数据目录 `.data/paper-test-7899/.data`，与正式 7801 完全隔离） |
+| 被测实例 | `http://127.0.0.1:7899/editor`（隔离实例，数据目录 `data/paper-test-7899/.data`，与正式 7801 完全隔离） |
 | 浏览器页签 | BrowserOS page id = **9**（`mcp__browseros__*` 的 `page:9`） |
 | 上游产物 | `bundle-f9164fb5-ced37e37.js` + `styles-f9164fb5-ced37e37.css`（离线缓存，未改动） |
 | 测试视口 | 默认 1440×900；响应式见第 6 节 |

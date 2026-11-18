@@ -1,7 +1,7 @@
 # 白纸模式（Paper Mode）独立验收报告
 
-- 被测版本：`web/paper-mode.js` (2026-11-15 11:02:03, md5 `8eed6aec…`)、`web/paper-mode.css` (11:07:33, md5 `b5a598d8…`)、`server.py` (10:19, md5 `c171641a…`)、`docs/paper-mode.md` (11:02:38)
-- 被测实例：`http://127.0.0.1:7802/editor`（Lead 起的 dev 实例，数据在 `.data/paper-dev/`，CAS 启用；测试期间 7802 数据由我独占写入，未重启服务）
+- 被测版本：`src/web/paper-mode.js` (2026-11-15 11:02:03, md5 `8eed6aec…`)、`src/web/paper-mode.css` (11:07:33, md5 `b5a598d8…`)、`src/server.py` (10:19, md5 `c171641a…`)、`docs/paper-mode.md` (11:02:38)
+- 被测实例：`http://127.0.0.1:7802/editor`（Lead 起的 dev 实例，数据在 `data/paper-dev/`，CAS 启用；测试期间 7802 数据由我独占写入，未重启服务）
 - 对照实例：`http://127.0.0.1:7801/editor`（旧版，无白纸模式注入；**只读**，只做测量，未打字、未改文档、未动用户页签）
 - 测试页签：新开窗口 page 15（`document.visibilityState === 'visible'`，所有键鼠用 CDP 真实事件投递）
 - 结论：**PASS 50 / FAIL 0 / 未验证 1**；**无 P0/P1，无阻塞发布问题**。核心链路（进入/退出/白纸外观/输入/公式/CAS 打开/保存/撤销/右键/查找/响应式/深色/状态同步/普通模式回归）全部可用。建议修复 1 个 P2（深色偏好冷启动时首屏短暂"非白纸态"）后再交付，其余为 P3 与文档/环境注记。
@@ -78,7 +78,7 @@
 | E3 | 按 `\` | 符号建议框出现且白底可读 | `.auto-complete-container` 282×291，背景 `#fff`/文字 `#333`（深色偏好下仍为浅色） | PASS |
 | E4 | 建议框打开时 `Esc` | 不退出白纸模式（Esc 让给浮层） | 连按两次 Esc 后建议框关闭，全程 `on:true`；未发生误退（"单次 Esc 不关框"见 P3-1） | PASS |
 | E5 | 选中公式 → `fx` 真实点击 | CAS 面板打开、列出 SymPy 操作 | 右侧面板 420×828 @`(1020,72)`，标题 `CAS Dialog`，`33/33` 加载完成，列出 Substitute/Simplify/Expand/Factor/Cancel/Partial Fractions/… 共 33 项，浅色主题 | PASS |
-| E6 | 自动保存 | 编辑后写 `.data`，刷新后仍在 | `.data/paper-dev/.data/store.json` 多次更新（11:09/11:10/11:11 等 PUT），刷新后正文（hello、x+1、x²−9、Z）完整恢复 | PASS |
+| E6 | 自动保存 | 编辑后写 `data`，刷新后仍在 | `data/paper-dev/data/store.json` 多次更新（11:09/11:10/11:11 等 PUT），刷新后正文（hello、x+1、x²−9、Z）完整恢复 | PASS |
 | E7 | `Ctrl+S` | 触发保存 | `api.log` 出现 `PUT … body=2029B`，`Saved` 状态；深色/浅色下均正常 | PASS |
 | E8 | `Ctrl+Z` 撤销 | 撤销最近输入 | `helloX` → `Ctrl+Z` → `hello` | PASS |
 | E9 | 右键菜单 | 自定义上下文菜单打开 | `context-menu-container` @点击点 202×256、白底，含 Copy/Cut/Delete/Spell Check 等 | PASS |
@@ -153,9 +153,9 @@
 - **期望**：首帧即白纸外观；深色偏好下 `data-ui-theme` 全程保持 `light`。
 - **影响**：深色用户冷启动/用 `?paper=1` 书签打开时，可能看到约 0.4–0.6 s 的正常界面或深色浮层闪动（内容区因 CSS `!important` 一直是白底，核心功能与数据不受影响；实测 1.3 s 后即稳定为白纸态）。属观感问题，不阻塞核心功能。
 - **涉及文件:行**
-  - `server.py:105-108`（`PAPER_MODE_ASSETS` 以 `defer` 注入）、`server.py:227`（注入到 `</head>`）
-  - `web/paper-mode.js:562-575`（`boot()` 在 DOMContentLoaded 后才加 `paper-mode` class）
-  - `web/paper-mode.js:126-140`（`forceLightTheme`）、`web/paper-mode.js:539-546`（每 120 ms 轮询纠正 `data-ui-theme`）
+  - `src/server.py:105-108`（`PAPER_MODE_ASSETS` 以 `defer` 注入）、`src/server.py:227`（注入到 `</head>`）
+  - `src/web/paper-mode.js:562-575`（`boot()` 在 DOMContentLoaded 后才加 `paper-mode` class）
+  - `src/web/paper-mode.js:126-140`（`forceLightTheme`）、`src/web/paper-mode.js:539-546`（每 120 ms 轮询纠正 `data-ui-theme`）
 - **建议修法**
   1. 在 `</head>` **最前面**注入一段非 `defer` 的内联脚本，同步读 localStorage/URL 后立即 `document.documentElement.classList.add('paper-mode','paper-pending')` 并 `setAttribute('data-ui-theme','light')`（此时 head 中已有 `paper-mode.css`，可保证首帧白）；
   2. 给 `data-ui-theme` 挂 `MutationObserver`，被上游改回 dark 时立即纠正，而不是等 120 ms tick；
@@ -165,19 +165,19 @@
 
 - **实测**：无浮层时行为完全符合 B3（单次不退出、150 ms 双击退出）。但**"建议框/查找替换打开时单次 Esc 关闭它"在本机不成立**：建议框打开时第 1 次 Esc 后浮层仍在（约 500 ms 内多次采样仍可见），第 2 次 Esc 才关闭；随后 500 ms 内的下一次 Esc 也不会退出白纸模式（安全方向，不会误退）。
 - **对照**：在 7802 **普通模式**（未进入白纸模式，白纸 JS 不拦截 Esc）重复同一操作，同样是"两次 Esc 才关建议框"，说明这是上游/环境行为，**不是白纸模式引入的回归**。
-- **涉及文件:行**：`web/paper-mode.js:497-536`（`hasOpenOverlay()` + `escCount` 逻辑）、`docs/paper-mode.md:28`（文档表述）。
+- **涉及文件:行**：`src/web/paper-mode.js:497-536`（`hasOpenOverlay()` + `escCount` 逻辑）、`docs/paper-mode.md:28`（文档表述）。
 - **建议**：文档改为"浮层打开时 Esc 交给 Mathcha 关浮层（本机可能需连按两次），不会退出白纸模式；无浮层时 500 ms 内双击 Esc 退出"；代码无需改动（当前行为更安全）。
 
 ### P3-2（低）多页签共享 localStorage，白纸模式"记忆"会互相覆盖
 
 - **实测**：7802 同源多页签并存时，另一个页签（`?paper=1`/刷新）会把 `mathcha-local.paper-mode` 写成 `"1"`，导致本页签退出后 `stored` 仍为 `"1"`（页面自身 UI 状态正确）；还观察到一次白纸模式中 `stored:"0"`。影响的是下次打开时的"自动进入"判断，不影响当前页工作。
-- **涉及文件:行**：`web/paper-mode.js:25`（存储键）、`web/paper-mode.js:373-386`（`applyPaper` 持久化）、`web/paper-mode.js:562-575`（`boot` 读取）。
+- **涉及文件:行**：`src/web/paper-mode.js:25`（存储键）、`src/web/paper-mode.js:373-386`（`applyPaper` 持久化）、`src/web/paper-mode.js:562-575`（`boot` 读取）。
 - **建议**：监听 `storage` 事件同步其它页签开关；或改用 `sessionStorage` 存"记忆"；至少文档注明多页签会互相影响。
 
 ### P3-3（低）`?paper=0` 只临时覆盖、不清记忆
 
 - **实测**：记忆为 `1` 时用 `?paper=0` / `#normal` 打开确为普通模式（`on:false`），但 localStorage 仍为 `"1"`，之后不带参数再打开又会自动进入白纸模式。文档 §1 已写明是"临时覆盖"，行为与文档一致，但用户可能误以为"退出没生效"。
-- **涉及文件:行**：`web/paper-mode.js:82-93`（`urlPref`）、`web/paper-mode.js:562-575`；`docs/paper-mode.md:20`、`docs/paper-mode.md:107`。
+- **涉及文件:行**：`src/web/paper-mode.js:82-93`（`urlPref`）、`src/web/paper-mode.js:562-575`；`docs/paper-mode.md:20`、`docs/paper-mode.md:107`。
 - **建议**：文档加一句"想持久关闭请用界面按钮退出，或删 localStorage 键"；或提供 `?paper=0&forget=1` 之类可选语义。
 
 ### P3-4（低，非白纸模式范畴）CAS 面板没有可见关闭按钮
@@ -186,7 +186,7 @@
 
 ### P3-5（低，文档细节）桌面留白数值与文档不一致
 
-- `docs/paper-mode.md:80` 称"上下留白约 5–7 vh"，实测 `web/paper-mode.css:112-115` 的 `content-area padding-top: clamp(48px,9vh,112px)`（1440×900 时为 81px，纸张顶边 y=91 ≈ 10.1vh），底部 `padding-bottom:28vh`。建议文档与 CSS 对齐。
+- `docs/paper-mode.md:80` 称"上下留白约 5–7 vh"，实测 `src/web/paper-mode.css:112-115` 的 `content-area padding-top: clamp(48px,9vh,112px)`（1440×900 时为 81px，纸张顶边 y=91 ≈ 10.1vh），底部 `padding-bottom:28vh`。建议文档与 CSS 对齐。
 
 ### 环境注记（非 bug，供后续复测参考）
 
@@ -231,9 +231,9 @@
 
 | 文件 | mtime | md5 |
 |---|---|---|
-| `server.py`（新增 `PAPER_MODE_BOOT` 内联 boot 脚本，注入在 `</head>`、defer 脚本之前） | 2026-11-15 11:37:00 | `332324da…` |
-| `web/paper-mode.js`（`forceLightTheme` 优先用 `__paperBootPrevTheme`；新增 `data-ui-theme` MutationObserver；退出先摘 class 再恢复主题） | 2026-11-15 11:34:59 | `79250847…` |
-| `web/paper-mode.css` | 2026-11-15 11:07:33 | `b5a598d8…`（未变） |
+| `src/server.py`（新增 `PAPER_MODE_BOOT` 内联 boot 脚本，注入在 `</head>`、defer 脚本之前） | 2026-11-15 11:37:00 | `332324da…` |
+| `src/web/paper-mode.js`（`forceLightTheme` 优先用 `__paperBootPrevTheme`；新增 `data-ui-theme` MutationObserver；退出先摘 class 再恢复主题） | 2026-11-15 11:34:59 | `79250847…` |
+| `src/web/paper-mode.css` | 2026-11-15 11:07:33 | `b5a598d8…`（未变） |
 
 复测页签：新建窗口 page 23（原 page 15 所在窗口此时 rAF 已冻结——未聚焦/被遮挡；新建窗口 rAF 正常，符合 §0.2 注记）。原 rAF 采样/错误钩子脚本注册在旧 target，本页签用新的 rAF 帧采样脚本。
 

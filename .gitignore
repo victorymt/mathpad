@@ -1,14 +1,11 @@
 # 运行时数据：你的文档（不想进版本库）
-.data/
-
-# 编辑器静态资源缓存（首次运行自动下载，约 15 MB，可随时重建）
-.cache/
+data/
 
 # 运行日志
 .logs/
 
-# 登录态（仅 --online 模式需要，绝不提交）
-.cookies.json
+# Node 依赖（只有 npm run unpack 需要，日常运行不需要）
+node_modules/
 
 # Python
 __pycache__/

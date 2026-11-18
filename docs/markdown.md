@@ -9,25 +9,25 @@
 
 ```bash
 # 导入（需要服务在跑；结果出现在编辑器左侧文档列表，刷新页面即可看到）
-python3 md_convert.py import notes.md --name "我的笔记"
+python3 src/md/convert.py import notes.md --name "我的笔记"
 
 # 只转换、不落库：打印模型 JSON 和降级警告
-python3 md_convert.py import notes.md --dry-run
+python3 src/md/convert.py import notes.md --dry-run
 
 # 列出所有文档（id + 名字），导出时用
-python3 md_convert.py list
+python3 src/md/convert.py list
 
 # 导出
-python3 md_convert.py export <docId> -o notes.md
+python3 src/md/convert.py export <docId> -o notes.md
 
 # 只看转换统计（不落库）
-python3 md_convert.py check notes.md
+python3 src/md/convert.py check notes.md
 ```
 
 服务没在跑时也可以直接写本地 store（注意：服务运行期间不要这样做，会被服务内存状态覆盖）：
 
 ```bash
-python3 md_convert.py import notes.md --offline
+python3 src/md/convert.py import notes.md --offline
 ```
 
 HTTP 接口（编辑器和脚本都能用）：
@@ -86,7 +86,7 @@ curl -s 'http://127.0.0.1:7801/api/md/export?docId=<docId>'
 `\title4` 及以上会压到 3 级并给告警。两种写法可以混用。
 
 > 另外：**在编辑器里**，正文空行行首敲 `#1` / `#2` / `#3` 也能生成层级标题
-> （`web/title-command.js`，由 server.py 注入；只在本机离线版生效）。该增强需要重启 `./start.sh` 才生效。
+> （`src/web/title-command.js`，由 src/server.py 注入；只在本机离线版生效）。该增强需要重启 `npm run dev` 才生效。
 >
 > 为什么编辑器内用 `#1` 而不是 `\title1`：`\` 是编辑器的符号建议框触发键，在键盘捕获阶段拦它会让
 > `\` 延迟 1.5s 才进编辑器（v1 的 bug）。`#` 在正文里只是普通字符，没有冲突，所以零延迟。
@@ -125,7 +125,7 @@ curl -s 'http://127.0.0.1:7801/api/md/export?docId=<docId>'
 ## 5. 自检与验收
 
 ```bash
-python3 md_selftest.py      # 54 项：结构断言 + 回环幂等 + 探针样本回归
+python3 src/md/selftest.py      # 54 项：结构断言 + 回环幂等 + 探针样本回归
 ```
 
 - 结构断言：标题/列表/行内样式/行内数学/块级数学/降级警告/空输入/转义；

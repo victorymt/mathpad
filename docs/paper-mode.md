@@ -4,7 +4,7 @@
 > header、侧栏、工具栏、插入条、缩放信息条、页面描边全部藏起来；
 > 同时保留输入、公式、CAS、自动保存等核心能力。
 >
-> 实现方式见 `web/paper-mode.css` 与 `web/paper-mode.js`（由 `server.py` 注入），不改上游 bundle。
+> 实现方式见 `src/web/paper-mode.css` 与 `src/web/paper-mode.js`（由 `src/server.py` 注入），不改上游 bundle。
 
 ![白纸模式（桌面 1440×900）](../screenshots/paper-mode-desktop.png)
 
@@ -101,15 +101,15 @@ $ 插入公式 · \ 打开符号建议 · Esc Esc 或 Alt+Shift+E 退出
 1. **布局复用 Mathcha 内置的 Content View Only**（`state.fullScreen`，快捷键 `Alt+Shift+E`）：
    它会隐藏 header / 侧栏 / 工具栏并让内容区拉满、纸张居中，布局重算由上游自己完成，
    避免我们跟 React 抢内联样式（`docs-container` 的 `left/right/bottom`、`doc-scroll-container` 的 `height` 等每次 render 都会被重写）。
-2. `web/paper-mode.js` 通过点击内置按钮（`.full-view-button` / `[title^="Exit Content View Only"]`）来切换这个布局；
+2. `src/web/paper-mode.js` 通过点击内置按钮（`.full-view-button` / `[title^="Exit Content View Only"]`）来切换这个布局；
    按钮被我们的 CSS 隐藏后仍然可以被脚本点击。按钮不可用时退回派发 `Alt+Shift+E` 键盘事件。
-3. 切到该布局后，`web/paper-mode.css` 在 `html.paper-mode` 作用域内把一切刷白、藏掉残余 chrome：
+3. 切到该布局后，`src/web/paper-mode.css` 在 `html.paper-mode` 作用域内把一切刷白、藏掉残余 chrome：
    - `--ui-workspace: #fff`（Mathcha 的工作区底色变量，一处带走 html/body/#root/page/container-layer/content-area 的灰底）
    - 隐藏 `document-info-bar`、`resize-bar`、页宽拖拽条等
    - 深色主题下强制 `data-ui-theme="light"`，退出时恢复原主题
 4. **状态同步**：每 120 ms 读一次"是否在 Content View Only"（只看 React 写下的痕迹：退出按钮的 title、`container-layer` 的内联 `height:100%`，**不看** header 的 computed display，避免被自己的 CSS 误导）。
    因此用户直接按 `Alt+Shift+E`（或点 Mathcha 自带的右下角内容视图按钮）时，白纸模式也会自动跟随，不会出现"模式状态脱节"。
-5. **首帧不闪**：`server.py` 在 `</head>` 注入一小段内联脚本，在首帧之前就给 `<html>` 挂上 `paper-mode` 并把主题定为浅色；上游 `index.js` 稍后按自己的偏好写回深色时，会被 `MutationObserver` 在**同一次任务**里纠回浅色（退出时先摘 class 再恢复主题，所以观察器不会妨碍退出）。
+5. **首帧不闪**：`src/server.py` 在 `</head>` 注入一小段内联脚本，在首帧之前就给 `<html>` 挂上 `paper-mode` 并把主题定为浅色；上游 `index.js` 稍后按自己的偏好写回深色时，会被 `MutationObserver` 在**同一次任务**里纠回浅色（退出时先摘 class 再恢复主题，所以观察器不会妨碍退出）。
    实测（深色偏好 + 上次白纸模式）：时间线 `106ms: 深色（应用尚未挂载）→ 115ms: paper-mode + 浅色`，之后不再回到深色；退出后恢复深色。
 5. **焦点**：自绘按钮在 `mousedown` 上 `preventDefault()`，不抢编辑器焦点；进入后把焦点还给隐藏输入框并保持原光标，
    所以进入白纸模式后可以直接打字（不会丢字）。
@@ -122,7 +122,7 @@ $ 插入公式 · \ 打开符号建议 · Esc Esc 或 Alt+Shift+E 退出
 | `mathcha-local.paper-hint-dismissed` | sessionStorage | 本次会话内空白提示是否已被关掉 |
 | `?paper=1` / `#paper` / `?paper=0` / `#normal` | URL | 临时强制进入/退出，优先于记忆 |
 
-- **不写文档数据**：白纸模式只改界面状态，`.data/store.json` 的内容格式与正常模式完全一致。
+- **不写文档数据**：白纸模式只改界面状态，`data/store.json` 的内容格式与正常模式完全一致。
 - 退出时会恢复原主题（深/浅色）与完整界面；刷新页面不丢文档。
 
 ## 8. 已知限制
@@ -132,14 +132,14 @@ $ 插入公式 · \ 打开符号建议 · Esc Esc 或 Alt+Shift+E 退出
 - 文档如果自带"暗色纸张"设置（`math-type.dark-mode`），白纸模式会把它翻成白底黑字；正文里**显式**设置的颜色不受影响。
 - CAS 面板没有独立关闭按钮（上游行为：只能走面板齿轮菜单的 Close），退出白纸模式后同样如此。
 - 记忆值存在 `localStorage`，多标签页共享；不同标签页各自切换会互相覆盖（最后选择生效）。
-- 上游（Mathcha CDN）升级后 class/自定义元素名可能变化，需要复核 `web/paper-mode.css` 第 2.4 节的隐藏清单与 `paper-mode.js` 的探测逻辑。
+- 上游（Mathcha CDN）升级后 class/自定义元素名可能变化，需要复核 `src/web/paper-mode.css` 第 2.4 节的隐藏清单与 `paper-mode.js` 的探测逻辑。
 
 ## 9. 排查
 
 | 现象 | 处理 |
 |---|---|
-| 右上角看不到「白纸模式」入口 | 刷新一次页面；确认 `server.py` 已重启（旧进程不会注入 `/web/paper-mode.*`） |
-| 进入后仍是灰底/还有工具栏 | 浏览器控制台看 `/web/paper-mode.css` 是否 200；确认 `server.py` 是新版本 |
-| 按 `Alt+Shift+E` 后界面没变白 | 说明注入脚本没加载（`/web/paper-mode.js` 404） |
+| 右上角看不到「白纸模式」入口 | 刷新一次页面；确认 `src/server.py` 已重启（旧进程不会注入 `/src/web/paper-mode.*`） |
+| 进入后仍是灰底/还有工具栏 | 浏览器控制台看 `/src/web/paper-mode.css` 是否 200；确认 `src/server.py` 是新版本 |
+| 按 `Alt+Shift+E` 后界面没变白 | 说明注入脚本没加载（`/src/web/paper-mode.js` 404） |
 | 想彻底关掉白纸模式 | `?paper=0` 打开一次，或 `localStorage.removeItem('mathcha-local.paper-mode')` |
-| 想调整外观 | 直接改 `web/paper-mode.css`，刷新页面即可（`no-store`，不用重下资源） |
+| 想调整外观 | 直接改 `src/web/paper-mode.css`，刷新页面即可（`no-store`，不用重下资源） |

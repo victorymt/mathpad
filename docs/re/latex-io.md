@@ -1,6 +1,6 @@
 # LaTeX 互转（toLatex 导出 / parseLatex 导入 / MathML）
 
-> 分析对象：`.cache/cdn/bundle-f9164fb5-ced37e37.js` 拆包后的 `mathcha-src/modules/*.js`
+> 分析对象：`assets/cdn/bundle-f9164fb5-ced37e37.js` 拆包后的 `src/mathcha/modules/*.js`
 > 约定：`【核实】` = 直接读到实现/字面量；`【推测】` = 由调用关系推断、未做运行时验证。
 > 线上实测（Lead，tab 22）：`\frac` 的 DOM 类叫 enumerator/denominator，但模型槽位是 `value`/`sub1`；`\math-container` 槽位是 `mathValue`，带 `displayMode:false` 与 `style.mathModeType:"\\displaystyle"` —— 与本文静态结论一致。
 

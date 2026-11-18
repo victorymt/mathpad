@@ -1,9 +1,9 @@
 # 渲染与字体（task-4 / render-fonts）
 
-> 证据来源：`mathcha-src/modules/<id>.js`（webpack5 模块，属性名未混淆）、`.cache/cdn/bundle-f9164fb5-ced37e37.js`（未拆分的少数模块用 bundle 字节偏移标注）、
-> `.cache/cdn/styles-f9164fb5-ced37e37.css`、`.cache/cdn/resources/fonts-*.css`、`.cache/cdn/fonts/**`、`.cache/cdn/dynamic-resources/data1`。
+> 证据来源：`src/mathcha/modules/<id>.js`（webpack5 模块，属性名未混淆）、`assets/cdn/bundle-f9164fb5-ced37e37.js`（未拆分的少数模块用 bundle 字节偏移标注）、
+> `assets/cdn/styles-f9164fb5-ced37e37.css`、`assets/cdn/resources/fonts-*.css`、`assets/cdn/fonts/**`、`assets/cdn/dynamic-resources/data1`。
 > 动态取证由 Lead 提供（tab 22，`http://127.0.0.1:7801/editor`，实测敲 `$` → `\frac` → a / Tab / b）。
-> 自制脚本：`.cache/re/scratch/render-fonts_otf.py`（极简 sfnt/cmap/hmtx 解析）、`.cache/re/scratch/render-fonts_data1.js`（lz-string 解 data1）。
+> 自制脚本：`assets/re/scratch/render-fonts_otf.py`（极简 sfnt/cmap/hmtx 解析）、`assets/re/scratch/render-fonts_data1.js`（lz-string 解 data1）。
 > 标记：【已核实】有代码或动态产物直接支撑；【推测】为合理推断。
 
 ---
@@ -15,7 +15,7 @@
    代码：`11154.js` `Hu.render` 造 `math-type`；`39791.js` 造 `editarea`/`area-container`；`48397.js` `renderNormalTextBlock` 造 `block`；`67882.js` 造 `editarea-line`。
 
 2. **Mathcha 没有自己的"屏幕排版引擎"，它把浏览器当排版器，然后回读 DOM 尺寸。**【已核实】
-   `48397.js` `storeCacheSize:` 用 `getBoundingClientRect` 量 `line` 和 `<baselineblock>`，算出 `{w,h,bl}`（`bl` = 基线占高比例）写进 `delayRenderCache`；Lead 的 `.data/store.json` 里正是 `{"w":20.6016,"h":39.1953,"bl":0.6352}`。
+   `48397.js` `storeCacheSize:` 用 `getBoundingClientRect` 量 `line` 和 `<baselineblock>`，算出 `{w,h,bl}`（`bl` = 基线占高比例）写进 `delayRenderCache`；Lead 的 `data/store.json` 里正是 `{"w":20.6016,"h":39.1953,"bl":0.6352}`。
 
 3. **行内几何是手调常数 + em 单位 CSS，按"整像素"取整。**【已核实】
    `43369.js`（分式）写死 `marginBottom:-0.5em` / `marginTop:-0.41em`；`516.js` `getEmRound(e,t)=Math.round(e*t)/t` 把 em 量化到整数 px。17px 字号下 `-0.5em → -8/17 = -0.470588em`，与 Lead 抓到的 `-0.470588em` 完全一致。
@@ -47,7 +47,7 @@
 ```
                          ┌──────────────────────────────────────────────────────────────┐
 模型 model               │ lines[] → blocks[]（single 有 text；composite 有 elements 槽）│  task-1/2 范围
-（.data/store.json）     └──────────────────────────────────────────────────────────────┘
+（data/store.json）     └──────────────────────────────────────────────────────────────┘
         │
         │ React 渲染（class 组件，createElement 自定义标签）
         ▼
@@ -128,7 +128,7 @@
 
 ### 1. 注册与加载（全部静态）
 
-- `editor.html` 引 `<link rel=stylesheet href="https://cdn.mathcha.io/resources/fonts-f9164fb5-ced37e37.css">`，本地由 `server.py` 的 `_rewrite_cdn()` 改写成 `/cdn/resources/fonts-…css`。【已核实】
+- `editor.html` 引 `<link rel=stylesheet href="https://cdn.mathcha.io/resources/fonts-f9164fb5-ced37e37.css">`，本地由 `src/server.py` 的 `_rewrite_cdn()` 改写成 `/cdn/resources/fonts-…css`。【已核实】
 - 该 CSS **61 条 @font-face**，`url("https://cdn.mathcha.io/fonts/…")`，同样被重写到 `/cdn/fonts/…`。【已核实】
 - bundle 里另有一份 **61 条 @font-face 的字符串常量 `Kh`**（偏移 ~5613970；我逐条解出：**61 rules = 42 个 math family + 16 条 Computer Modern 文本族 + 3 条 FontAwesome**，与 CSS 文件同款，仅 url 改为相对 `/fonts/…`），**只用于导出 HTML/打印**（`Kh.replace(/\/fonts\//g,"fonts/")` 后拼进导出页）；编辑器运行时并不注入它。【已核实】
   - 因此 bundle 里 `@font-face` 总出现 62 次 = 这份 `Kh` 的 61 条 + **运行时注入 `<style>` 的 1 条 FontAwesome 子集**（Lead 实测 `<style>` 里只有这一条）。
